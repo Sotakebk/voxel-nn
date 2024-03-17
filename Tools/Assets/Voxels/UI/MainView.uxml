@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Voxels/Styles.uss?fileID=7433441132597879392&amp;guid=6786e97b5998d8840afedee0c69b79e0&amp;type=3#Styles" />
+    <ui:VisualElement name="Container" style="flex-grow: 1; align-items: auto; justify-content: space-around; flex-shrink: 0; max-height: 100%; max-width: 100%; min-width: 100%; min-height: 100%;">
+        <ui:VisualElement name="TopBar" class="panel-with-background" style="flex-wrap: wrap; align-items: flex-start; align-self: stretch; justify-content: flex-start; flex-grow: 0; flex-direction: row;">
+            <ui:VisualElement name="ButtonContainer" style="flex-grow: 1; flex-direction: row;">
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" style="padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px;" />
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" style="padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px;" />
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" style="padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Content" style="flex-grow: 1; opacity: 1; flex-shrink: 0; visibility: hidden; display: flex; align-self: stretch; justify-content: flex-start;">
+            <ui:VisualElement class="panel-with-background" style="flex-grow: 0.2; max-height: none; max-width: 50%; flex-shrink: 0; flex-direction: column;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="BottomBar" class="panel-with-background" style="flex-grow: 0; align-self: stretch; flex-direction: row; justify-content: space-between; flex-wrap: nowrap; align-items: stretch; opacity: 1;">
+            <ui:VisualElement name="VisualElement" style="flex-grow: 0; align-self: auto; justify-content: flex-start; align-items: auto; flex-direction: row; margin-left: 0; flex-shrink: 0; flex-basis: 33.3%;">
+                <ui:Label tabindex="-1" text="Current state text" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CurrentStatus" style="justify-content: space-around; align-items: flex-start; align-self: center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 5px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 0; flex-direction: row; align-self: auto; justify-content: center; flex-shrink: 0; align-items: auto; flex-basis: 33.3%;">
+                <ui:Label tabindex="-1" text="Voxel (X: 1, Y:2, Z: 30)" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TargetVoxel" style="-unity-text-align: middle-left; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; align-self: center; justify-content: space-around;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 0; flex-shrink: 0; align-items: auto; flex-basis: 33.3%;">
+                <ui:VisualElement name="ProgressBarContainer" style="flex-grow: 0;">
+                    <ui:ProgressBar value="0.33" title="Lorem Ipsum Dolor Sit Amet" name="ProgressBar" high-value="1" style="min-width: 150px; flex-grow: 0; flex-shrink: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; display: flex; visibility: visible;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
