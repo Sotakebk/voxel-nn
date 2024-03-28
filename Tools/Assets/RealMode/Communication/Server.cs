@@ -1,6 +1,6 @@
 using System;
 
-namespace Voxels.Communication
+namespace RealMode.Communication
 {
     public class Server : IDisposable
     {

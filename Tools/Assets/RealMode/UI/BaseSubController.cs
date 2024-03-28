@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Voxels.UI
+namespace RealMode.UI
 {
     public class BaseSubController : MonoBehaviour
     {
@@ -12,9 +12,9 @@ namespace Voxels.UI
 
         // set from Unity
         [SerializeField]
-        protected VisualTreeAsset viewAsset;
+        protected VisualTreeAsset viewAsset = null!;
 
-        protected VisualElement view;
+        protected VisualElement view = null!;
 
         private void LateUpdate()
         {

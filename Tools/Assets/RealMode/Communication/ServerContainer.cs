@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Voxels.Communication
+namespace RealMode.Communication
 {
     public class ServerContainer : MonoBehaviour
     {

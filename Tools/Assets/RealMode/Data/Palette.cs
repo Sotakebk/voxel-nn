@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Voxels.Data
+namespace RealMode.Data
 {
+    [Serializable]
     public class Palette
     {
         public Dictionary<string, Color32> Colors { get; set; }

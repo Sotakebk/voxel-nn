@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 
-namespace Voxels.Data
+namespace RealMode.Data
 {
+    [Serializable]
     public class Entry
     {
         private readonly string DefaultName = "new entry";
@@ -13,9 +13,9 @@ namespace Voxels.Data
 
         public int[] Dimensions { get; set; }
 
-        public IReadOnlyCollection<string> BlockNames { get; set; }
+        public string[] BlockNames { get; set; }
 
-        public IReadOnlyCollection<int> Blocks { get; set; }
+        public int[] Blocks { get; set; }
 
         public (bool failed, string? message) Validate()
         {
@@ -28,10 +28,10 @@ namespace Voxels.Data
             foreach (var value in Dimensions)
                 totalLength *= value;
 
-            if (totalLength != Blocks.Count)
-                return (true, $"Blocks.Count is not equal to count implied by Lengths ({totalLength}).");
+            if (totalLength != Blocks.Length)
+                return (true, $"Blocks.Length is not equal to count implied by Lengths ({totalLength}).");
 
-            var maxBlockId = BlockNames.Count - 1;
+            var maxBlockId = BlockNames.Length - 1;
             foreach (var block in Blocks)
             {
                 if (maxBlockId <= block)

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Voxels.UI
+namespace RealMode.UI
 {
     public class MainController : MonoBehaviour
     {
