@@ -8,9 +8,7 @@
                 <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" style="padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px;" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="Content" style="flex-grow: 1; opacity: 1; flex-shrink: 0; visibility: hidden; display: flex; align-self: stretch; justify-content: flex-start;">
-            <ui:VisualElement class="panel-with-background" style="flex-grow: 0.2; max-height: none; max-width: 50%; flex-shrink: 0; flex-direction: column;" />
-        </ui:VisualElement>
+        <ui:VisualElement name="Content" style="flex-grow: 1; opacity: 1; flex-shrink: 0; visibility: hidden; display: flex; align-self: stretch; justify-content: flex-start;" />
         <ui:VisualElement name="BottomBar" class="panel-with-background" style="flex-grow: 0; align-self: stretch; flex-direction: row; justify-content: space-between; flex-wrap: nowrap; align-items: stretch; opacity: 1;">
             <ui:VisualElement name="VisualElement" style="flex-grow: 0; align-self: auto; justify-content: flex-start; align-items: auto; flex-direction: row; margin-left: 0; flex-shrink: 0; flex-basis: 33.3%;">
                 <ui:Label tabindex="-1" text="Current state text" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CurrentStatus" style="justify-content: space-around; align-items: flex-start; align-self: center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 5px;" />

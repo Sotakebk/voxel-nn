@@ -22,7 +22,7 @@ namespace Voxels.Data
             if (Dimensions.Length > 3)
                 return (true, "Dimensions.Length is greater than 3.");
             if (Dimensions.Length > 2)
-                return (true, "Dimensions.Length is lesser than 3.");
+                return (true, "Dimensions.Length is lesser than 2.");
 
             var totalLength = 1;
             foreach (var value in Dimensions)
