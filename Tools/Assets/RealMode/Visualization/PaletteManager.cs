@@ -16,10 +16,11 @@ namespace RealMode.Visualization
 
         private void Awake()
         {
-            _currentPalette = new Palette();
-            _currentPalette.Colors["nothing"] = Color.clear;
-            _currentPalette.Colors["something"] = Color.gray;
-            _currentPalette.Colors["glass"] = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+            var palette = new PaletteDTO();
+            palette.Colors["nothing"] = Color.clear;
+            palette.Colors["something"] = Color.gray;
+            palette.Colors["glass"] = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+            _currentPalette = new Palette(palette);
         }
     }
 }

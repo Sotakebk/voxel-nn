@@ -11,15 +11,15 @@ namespace RealMode.Visualization
         private PaletteManager paletteManager = null!;
 
         [SerializeReference]
-        private VoxelVisualizationController _visualization3DController = null!;
+        private VoxelVisualizer _visualization3DController = null!;
 
 
         [SerializeReference]
-        private Entry _currentlyVisualizedEntry = null!;
+        private EntryDTO _currentlyVisualizedEntry = null!;
 
         private void Start()
         {
-            var entry = new Entry()
+            var entry = new EntryDTO()
             {
                 BlockNames = new[] { "nothing", "something", "glass" },
                 Dimensions = new[] { 16, 16, 16 },
@@ -40,7 +40,7 @@ namespace RealMode.Visualization
             var (validationFailed, message) = entry.Validate();
             if (!validationFailed)
                 throw new Exception(message);
-            Visualize(entry);
+            Visualize(new Entry(entry));
             _currentlyVisualizedEntry = entry;
         }
 
@@ -48,32 +48,17 @@ namespace RealMode.Visualization
         {
             switch (entry.Dimensions.Length)
             {
-                /*
-                case 2:
-                    Visualize2D(entry);
-                    break;
-                */
                 case 3:
                     Visualize3D(entry);
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(entry), "Only '2' and '3' are valid dimension numbers.");
+                    throw new ArgumentOutOfRangeException(nameof(entry), "Only three dimensions are supported.");
             }
         }
 
-        /*
-        private void Visualize2D(Entry entry)
-        {
-            _visualization2DController.Clear();
-            _visualization3DController.Clear();
-            _visualization2DController.Visualize(entry);
-        }
-        */
-
         private void Visualize3D(Entry entry)
         {
-            //_visualization2DController.Clear();
             _visualization3DController.Clear();
             _visualization3DController.Visualize(entry, paletteManager.CurrentPalette);
         }

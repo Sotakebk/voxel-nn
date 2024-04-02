@@ -5,11 +5,11 @@ using UnityEngine;
 namespace RealMode.Data
 {
     [Serializable]
-    public class Palette
+    public class PaletteDTO
     {
-        public Dictionary<string, Color32> Colors { get; set; }
+        public Dictionary<string, Color32> Colors;
 
-        public Palette()
+        public PaletteDTO()
         {
             Colors = new Dictionary<string, Color32>();
         }

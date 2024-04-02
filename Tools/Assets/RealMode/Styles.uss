@@ -14,3 +14,31 @@
     border-top-color: rgb(178, 178, 178);
     border-bottom-color: rgb(178, 178, 178);
 }
+
+.unity-button {
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.panel-container {
+    flex-grow: 1;
+    background-color: rgba(178, 178, 178, 0.4);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-left-color: rgb(178, 178, 178);
+    border-right-color: rgb(178, 178, 178);
+    border-top-color: rgb(178, 178, 178);
+    border-bottom-color: rgb(178, 178, 178);
+}

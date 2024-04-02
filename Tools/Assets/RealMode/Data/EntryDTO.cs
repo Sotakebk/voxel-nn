@@ -3,19 +3,13 @@ using System;
 namespace RealMode.Data
 {
     [Serializable]
-    public class Entry
+    public class EntryDTO
     {
-        private readonly string DefaultName = "new entry";
-
-        public string FriendlyName { get; set; }
-
-        public string[] Tags { get; set; }
-
-        public int[] Dimensions { get; set; }
-
-        public string[] BlockNames { get; set; }
-
-        public int[] Blocks { get; set; }
+        public string FriendlyName;
+        public string[] Tags;
+        public int[] Dimensions;
+        public string[] BlockNames;
+        public int[] Blocks;
 
         public (bool failed, string? message) Validate()
         {
@@ -42,9 +36,9 @@ namespace RealMode.Data
             return (false, null);
         }
 
-        public Entry()
+        public EntryDTO()
         {
-            FriendlyName = DefaultName;
+            FriendlyName = string.Empty;
             Tags = Array.Empty<string>();
             Dimensions = Array.Empty<int>();
             BlockNames = Array.Empty<string>();
