@@ -8,7 +8,7 @@ namespace RealMode.Visualization.Voxels
     [Serializable]
     public class VoxelVisualizerSettings : INotifyPropertyChanged
     {
-        private int _minX, _maxX, _minY, _maxY, _minZ, _maxZ;
+        [SerializeField] private int _minX, _maxX, _minY, _maxY, _minZ, _maxZ;
 
         private void SetProperty<T>(ref T field, T value, [CallerMemberName] string? source = null)
         {
@@ -57,11 +57,15 @@ namespace RealMode.Visualization.Voxels
 
     public class VoxelVisualizer : MonoBehaviour
     {
-        [SerializeReference] public Material SolidMaterial = null!;
-        [SerializeReference] public Material TransparentMaterial = null!;
-        [SerializeReference] public VoxelCameraController CameraController = null!;
+        [SerializeReference] private Material _solidMaterial = null!;
+        [SerializeReference] private Material _transparentMaterial = null!;
+        [SerializeReference] private VoxelCameraController _cameraController = null!;
+        [SerializeReference] private Transform _baseCubeTransform = null!;
         private VisualizationElement[] _solidVisualizationElements = Array.Empty<VisualizationElement>();
         private VisualizationElement[] _transparentVisualizationElements = Array.Empty<VisualizationElement>();
+        [SerializeField] private VoxelVisualizerSettings _settings = new VoxelVisualizerSettings();
+
+        public VoxelVisualizerSettings Settings => _settings;
 
         private void Awake()
         {
@@ -70,13 +74,13 @@ namespace RealMode.Visualization.Voxels
             for (int i = 0; i < 6; i++)
             {
                 _solidVisualizationElements[i] =
-                    VisualizationElement.ConstructOnNewGameObject($"Solid {i}", SolidMaterial, transform);
+                    VisualizationElement.ConstructOnNewGameObject($"Solid {i}", _solidMaterial, transform);
             }
 
             for (int i = 0; i < 6; i++)
             {
                 _transparentVisualizationElements[i] =
-                    VisualizationElement.ConstructOnNewGameObject($"Transparent {i}", TransparentMaterial, transform);
+                    VisualizationElement.ConstructOnNewGameObject($"Transparent {i}", _transparentMaterial, transform);
             }
         }
 
@@ -93,11 +97,8 @@ namespace RealMode.Visualization.Voxels
             gameObject.SetActive(false);
         }
 
-        public void Visualize(Entry entry, Palette palette)
+        public void Visualize(Entry3D entry, Palette palette)
         {
-            if (entry.Dimensions.Length != 3)
-                throw new ArgumentException("Entry dimensions not equal to 3");
-
             Clear();
 
             var (solidMeshes, transparentMeshes) = VoxelMeshingLogic.GenerateMesh(entry, palette);
@@ -119,7 +120,17 @@ namespace RealMode.Visualization.Voxels
             }
 
             gameObject.SetActive(true);
-            CameraController.HandleEntryOpened(entry);
+            _cameraController.HandleEntryOpened(entry);
+            ScaleBaseCube(entry);
+        }
+
+        private void ScaleBaseCube(Entry3D entry)
+        {
+            var x = entry.SizeX;
+            var y = entry.SizeY;
+            var z = entry.SizeZ;
+            _baseCubeTransform.position = new Vector3(x, y, z) / 2f;
+            _baseCubeTransform.localScale = new Vector3(x, y, z);
         }
     }
 }

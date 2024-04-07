@@ -5,7 +5,7 @@ namespace RealMode
 {
     public class LoadedEntriesService : MonoBehaviour
     {
-        private List<Entry> _loadedEntries = new List<Entry>();
+        private List<Entry3D> _loadedEntries = new List<Entry3D>();
         private object _lock = new object();
 
         public delegate void LoadedEntriesUpdatedEventHandler(LoadedEntriesService sender);
@@ -15,13 +15,13 @@ namespace RealMode
         private bool _shouldTriggerEvent = false;
 
 
-        public IEnumerable<Entry> GetLoadedEntries()
+        public IEnumerable<Entry3D> GetLoadedEntries()
         {
             lock (_lock)
                 return _loadedEntries.ToArray();
         }
 
-        public bool AddEntry(Entry entry)
+        public bool AddEntry(Entry3D entry)
         {
             var valueToReturn = false;
             lock (_lock)
@@ -36,7 +36,7 @@ namespace RealMode
             return valueToReturn;
         }
 
-        public bool RemoveEntry(Entry entry)
+        public bool RemoveEntry(Entry3D entry)
         {
             var valueToReturn = false;
             lock (_lock)

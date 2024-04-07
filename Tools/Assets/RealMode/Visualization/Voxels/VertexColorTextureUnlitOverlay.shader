@@ -1,22 +1,16 @@
-﻿Shader "Custom/VertexColorTextureUnlitTransparent" {
+﻿Shader "Custom/VertexColorTextureUnlitOverlay" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
     }
 
     SubShader
     {
-        Tags {"Queue"="AlphaTest" "IgnoreProjector"="True"}
-        LOD 100
-
-        Pass {
-            ZWrite On
-            ColorMask 0
-        }
-
-        Tags {"Queue"="AlphaTest"}
+        Tags {"Queue"="Overlay"}
         LOD 300
-        ZTest LEqual
+        ZTest Off
+        ZWrite Off
         CGPROGRAM
+
         #pragma surface surf NoLighting alpha fullforwardshadows
         #pragma target 3.0
 
@@ -44,3 +38,4 @@
         ENDCG
     }
 }
+
