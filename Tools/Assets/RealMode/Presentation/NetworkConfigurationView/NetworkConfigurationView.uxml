@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement class="backgroundPanel viewContainer">
+        <ui:VisualElement style="flex-direction: row; justify-content: center; flex-wrap: wrap; align-self: auto; align-items: flex-start;">
+            <ui:TextField picking-mode="Ignore" label="Local server port:" value="filler text" text="9001" name="portTextField" style="align-items: center;" />
+            <ui:Button text="Apply" display-tooltip-when-elided="true" name="applyButton" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

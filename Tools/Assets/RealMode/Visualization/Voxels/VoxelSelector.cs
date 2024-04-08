@@ -1,3 +1,4 @@
+using RealMode.Presentation.General;
 using UnityEngine;
 
 namespace RealMode.Visualization.Voxels
@@ -5,7 +6,7 @@ namespace RealMode.Visualization.Voxels
     [RequireComponent(typeof(Camera))]
     public class VoxelSelector : MonoBehaviour
     {
-        [SerializeReference] UI.TargetElementController _targetElementController = null!;
+        [SerializeReference] TargetVoxelPresenter _targetVoxelPresenter = null!;
         [SerializeReference] Transform _selectorCube = null!;
         [SerializeReference] ActiveEntryService _selectedEntryService = null!;
 
@@ -33,13 +34,13 @@ namespace RealMode.Visualization.Voxels
                     throw new System.Exception("Hit voxel index out of range?");
                 var name = currentEntry.IndexToNameDict[index.Value];
 
-                _targetElementController.UpdateTargetElement(name, point);
+                _targetVoxelPresenter.UpdateTargetElement(name, point);
                 _selectorCube.position = point + new Vector3(0.5f, 0.5f, 0.5f);
                 _selectorCube.gameObject.SetActive(true);
             }
             else
             {
-                _targetElementController.ClearTargetElement();
+                _targetVoxelPresenter.ClearTargetElement();
                 _selectorCube.gameObject.SetActive(false);
             }
         }

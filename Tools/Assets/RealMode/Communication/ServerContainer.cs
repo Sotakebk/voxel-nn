@@ -1,23 +1,38 @@
+using System.Net;
 using UnityEngine;
 
 namespace RealMode.Communication
 {
+    public static class DefaultAddress
+    {
+        public static IPAddress Address => IPAddress.Loopback;
+        public const int Port = 9001;
+    }
+
     public class ServerContainer : MonoBehaviour
     {
-        private Server? Server;
-
-        public void StartServer()
+        public short Port
         {
-            if (Server != null)
+            get => _port;
+            set
             {
-                Server.Dispose();
+                _port = value;
+                //Server.ChangePort(_port);
             }
-
-            Server = new Server();
         }
 
-        public void StopServer()
+        public Server Server { get; private set; } = null!;
+
+        public short _port = DefaultAddress.Port;
+
+        private void Awake()
         {
+            Server = new Server(_port, DefaultAddress.Address);
+        }
+
+        private void OnDestroy()
+        {
+            // called when the play mode is stopped
             Server?.Dispose();
         }
     }

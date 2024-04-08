@@ -5,19 +5,35 @@ namespace RealMode.Visualization.Voxels
     [RequireComponent(typeof(Camera))]
     public class VoxelCameraController : MonoBehaviour
     {
-        [SerializeField] private Vector3 _targetCenter;
-        [SerializeField] private float _distance = 30;
-        [SerializeField] private float _horizontal;
-        [SerializeField] private float _vertical;
+
+        private enum CameraMode
+        {
+            Perspective,
+            Orthographic
+        }
+
+        [SerializeReference] private ActiveEntryService _activeEntryService = null!;
+        private CameraMode _currentCameraMode;
+        [SerializeField] private float _perspectiveFov = 80;
         [SerializeField] private float _mouseSensitivity = 4;
-        [SerializeField] private bool _isDragging = false;
-        [SerializeField] private Plane _draggingPlane;
-        [SerializeField] private Vector3 _dragBeginPosition;
+        [SerializeField] private float _distance = 30;
+        private float _horizontal;
+        private float _vertical;
+        private bool _isDragging = false;
+        private Plane _draggingPlane;
+        private Vector3 _dragBeginPosition;
         private Camera _camera = null!;
+        private Vector3 _targetCenter;
 
         private void Awake()
         {
             _camera = GetComponent<Camera>();
+            _activeEntryService.OnEntryChanged += _activeEntryService_OnEntryChanged;
+        }
+
+        private void _activeEntryService_OnEntryChanged(ActiveEntryService sender)
+        {
+            ResetPositioning();
         }
 
         private void Update()
@@ -70,23 +86,38 @@ namespace RealMode.Visualization.Voxels
                 }
             }
 
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                if (_currentCameraMode == CameraMode.Perspective)
+                {
+                    SetCameraMode(CameraMode.Orthographic);
+                }
+                else
+                {
+                    SetCameraMode(CameraMode.Perspective);
+                }
+                anythingChanged = true;
+            }
+
             if (anythingChanged)
             {
                 UpdatePosition();
             }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                ResetPositioning();
+            }
         }
 
-        private void UpdatePosition()
+        private void SetCameraMode(CameraMode mode)
         {
-            var lookingAngles = new Vector3(_vertical, _horizontal, 0);
-            var forward = Quaternion.Euler(lookingAngles) * Vector3.forward;
-
-            transform.rotation = Quaternion.Euler(lookingAngles);
-            transform.position = _targetCenter + (-forward * _distance);
+            _currentCameraMode = mode;
         }
 
-        public void HandleEntryOpened(Entry3D entry)
+        private void ResetPositioning()
         {
+            var entry = _activeEntryService.CurrentEntry as Entry3D ?? throw new System.Exception();
             var x = entry.SizeX;
             var y = entry.SizeY;
             var z = entry.SizeZ;
@@ -94,7 +125,32 @@ namespace RealMode.Visualization.Voxels
             _horizontal = 45f;
             _vertical = 30f;
             _distance = new Vector3(x, y, z).magnitude * 1.2f;
+            SetCameraMode(CameraMode.Perspective);
             UpdatePosition();
+        }
+
+        private void UpdatePosition()
+        {
+            if (_currentCameraMode == CameraMode.Perspective)
+            {
+                var lookingAngles = new Vector3(_vertical, _horizontal, 0);
+                var forward = Quaternion.Euler(lookingAngles) * Vector3.forward;
+
+                transform.rotation = Quaternion.Euler(lookingAngles);
+                transform.position = _targetCenter + (-forward * _distance);
+                _camera.orthographic = false;
+                _camera.fieldOfView = _perspectiveFov;
+            }
+            else
+            {
+                var lookingAngles = new Vector3(_vertical, _horizontal, 0);
+                var forward = Quaternion.Euler(lookingAngles) * Vector3.forward;
+
+                transform.rotation = Quaternion.Euler(lookingAngles);
+                transform.position = _targetCenter + (-forward * 400);
+                _camera.orthographic = true;
+                _camera.orthographicSize = _distance;
+            }
         }
 
         public (Vector3 position, Plane plane) GetPositionAndPlaneForDragging()

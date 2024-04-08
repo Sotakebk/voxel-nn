@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement class="viewContainer" style="flex-direction: row; align-items: center; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; flex-grow: 0; flex-wrap: nowrap;">
+        <ui:ProgressBar value="0.33" title="Lorem Ipsum Dolor Sit Amet" name="ProgressBar" high-value="1" style="min-width: 150px; flex-grow: 0; flex-shrink: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; display: flex; visibility: visible;" />
+    </ui:VisualElement>
+</ui:UXML>

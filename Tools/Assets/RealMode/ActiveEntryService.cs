@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace RealMode
@@ -44,8 +43,6 @@ namespace RealMode
                     }
                 }
             }
-
-            Debug.Log(entry.Blocks.ToCommaSeparatedString());
 
             SelectEntry(entry);
         }

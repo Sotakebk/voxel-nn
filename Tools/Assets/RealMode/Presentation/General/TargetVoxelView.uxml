@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/RealMode/Presentation/Styles.uss?fileID=7433441132597879392&amp;guid=82db61c79aac2a1418553cad495ff218&amp;type=3#Styles" />
+    <ui:VisualElement class="viewContainer" style="flex-direction: row; align-items: center; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; flex-grow: 0; flex-wrap: nowrap; align-self: center; justify-content: center; -unity-text-align: middle-center;">
+        <ui:Label tabindex="-1" text="Voxel (X: 1, Y:2, Z: 30)" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TargetVoxel" style="-unity-text-align: middle-center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; align-self: center; justify-content: center; font-size: 12px;" />
+    </ui:VisualElement>
+</ui:UXML>

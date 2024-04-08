@@ -59,7 +59,6 @@ namespace RealMode.Visualization.Voxels
     {
         [SerializeReference] private Material _solidMaterial = null!;
         [SerializeReference] private Material _transparentMaterial = null!;
-        [SerializeReference] private VoxelCameraController _cameraController = null!;
         [SerializeReference] private Transform _baseCubeTransform = null!;
         private VisualizationElement[] _solidVisualizationElements = Array.Empty<VisualizationElement>();
         private VisualizationElement[] _transparentVisualizationElements = Array.Empty<VisualizationElement>();
@@ -120,7 +119,6 @@ namespace RealMode.Visualization.Voxels
             }
 
             gameObject.SetActive(true);
-            _cameraController.HandleEntryOpened(entry);
             ScaleBaseCube(entry);
         }
 

@@ -1,10 +1,27 @@
 using System;
+using System.Net;
 
 namespace RealMode.Communication
 {
+    public enum ServerState
+    {
+        Uninitialized,
+        NotReady,
+        Ready,
+        Working,
+        Error
+    }
+
     public class Server : IDisposable
     {
         private bool disposedValue;
+
+        public ServerState State { get; private set; }
+
+        public Server(int port, IPAddress address)
+        {
+
+        }
 
         protected virtual void Dispose(bool disposing)
         {
