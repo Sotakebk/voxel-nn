@@ -5,14 +5,13 @@ namespace RealMode.Visualization.Voxels
     [RequireComponent(typeof(Camera))]
     public class VoxelCameraController : MonoBehaviour
     {
-
         private enum CameraMode
         {
             Perspective,
             Orthographic
         }
 
-        [SerializeReference] private ActiveEntryService _activeEntryService = null!;
+        [SerializeReference] private VisualizationService _visualizationService = null!;
         private CameraMode _currentCameraMode;
         [SerializeField] private float _perspectiveFov = 80;
         [SerializeField] private float _mouseSensitivity = 4;
@@ -28,10 +27,10 @@ namespace RealMode.Visualization.Voxels
         private void Awake()
         {
             _camera = GetComponent<Camera>();
-            _activeEntryService.OnEntryChanged += _activeEntryService_OnEntryChanged;
+            _visualizationService.OnEntryChangedOrModified += _visualizationService_OnEntryChangedOrModified;
         }
 
-        private void _activeEntryService_OnEntryChanged(ActiveEntryService sender)
+        private void _visualizationService_OnEntryChangedOrModified(VisualizationService sender)
         {
             ResetPositioning();
         }
@@ -117,16 +116,20 @@ namespace RealMode.Visualization.Voxels
 
         private void ResetPositioning()
         {
-            var entry = _activeEntryService.CurrentEntry as Entry3D ?? throw new System.Exception();
-            var x = entry.SizeX;
-            var y = entry.SizeY;
-            var z = entry.SizeZ;
-            _targetCenter = new Vector3(x + 1, y + 1, z + 1) / 2f;
-            _horizontal = 45f;
-            _vertical = 30f;
-            _distance = new Vector3(x, y, z).magnitude * 1.2f;
-            SetCameraMode(CameraMode.Perspective);
-            UpdatePosition();
+            var currentEntry = _visualizationService.CurrentEntry;
+            if (currentEntry.IsEntry3D())
+            {
+                var entry = _visualizationService.CurrentEntry as Entry3D ?? throw new System.Exception();
+                var x = entry.SizeX;
+                var y = entry.SizeY;
+                var z = entry.SizeZ;
+                _targetCenter = new Vector3(x + 1, y + 1, z + 1) / 2f;
+                _horizontal = 45f;
+                _vertical = 30f;
+                _distance = new Vector3(x, y, z).magnitude * 1.2f;
+                SetCameraMode(CameraMode.Perspective);
+                UpdatePosition();
+            }
         }
 
         private void UpdatePosition()

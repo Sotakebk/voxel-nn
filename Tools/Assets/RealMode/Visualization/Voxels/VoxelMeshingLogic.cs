@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace RealMode.Visualization.Voxels
 {
-    public class VoxelMeshingLogic
+    public class PixelMeshingLogic
     {
-        public static (Mesh[] solid, Mesh[] transparent) GenerateMesh(Entry3D entry, Palette palette)
+        public static (Mesh[] solid, Mesh[] transparent) GenerateMesh(Entry3D entry, Palette palette, CurrentVisualizationSettings settings)
         {
-            var context = new VoxelMeshingContext(entry, palette);
+            var context = new VoxelMeshingContext(entry, palette, settings);
 
             return context.GenerateMeshes();
         }
@@ -37,28 +37,24 @@ namespace RealMode.Visualization.Voxels
             }
         }
 
-        private readonly int _maxX;
-        private readonly int _maxY;
-        private readonly int _maxZ;
         private readonly Entry3D _entry;
         private readonly EntryPalette _palette;
+        private readonly CurrentVisualizationSettings _settings;
 
-        public VoxelMeshingContext(Entry3D entry, Palette palette)
+        public VoxelMeshingContext(Entry3D entry, Palette palette, CurrentVisualizationSettings settings)
         {
             _palette = new EntryPalette(palette, entry);
             _entry = entry;
-            _maxX = entry.SizeX;
-            _maxY = entry.SizeY;
-            _maxZ = entry.SizeZ;
+            _settings = settings;
         }
 
         public (Mesh[] solid, Mesh[] transparent) GenerateMeshes()
         {
-            var (solidMeshData, transparentMeshes) = BuildFaces();
+            var (solidMeshes, transparentMeshes) = BuildFaces();
             List<Mesh> solid = new List<Mesh>(6);
             List<Mesh> transparent = new List<Mesh>(6);
 
-            foreach (var m in solidMeshData)
+            foreach (var m in solidMeshes)
             {
                 solid.Add(ConstructMeshFromMeshData(m));
             }
@@ -124,15 +120,15 @@ namespace RealMode.Visualization.Voxels
             var solid = MeshData.GetNew();
             var transparent = MeshData.GetNew();
 
-            for (int x = 0; x < _maxX; x++)
+            for (int x = _settings.MinX; x < _settings.MaxX; x++)
             {
-                for (int y = 0; y < _maxY; y++)
+                for (int y = _settings.MinY; y < _settings.MaxY; y++)
                 {
-                    for (int z = 0; z < _maxZ; z++)
+                    for (int z = _settings.MinZ; z < _settings.MaxZ; z++)
                     {
-                        var currentVoxel = _entry.BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
-                        var forwardVoxel = _entry.BlockOrNothing(x + 1, y, z);
-                        var behindVoxel = _entry.BlockOrNothing(x - 1, y, z);
+                        var currentVoxel = BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
+                        var forwardVoxel = BlockOrNothing(x + 1, y, z);
+                        var behindVoxel = BlockOrNothing(x - 1, y, z);
 
                         if (ShouldDrawSolidFace(currentVoxel, forwardVoxel, out var color))
                         {
@@ -155,15 +151,15 @@ namespace RealMode.Visualization.Voxels
             var solid = MeshData.GetNew();
             var transparent = MeshData.GetNew();
 
-            for (int x = (_maxX - 1); x >= 0; x--)
+            for (int x = (_settings.MaxX - 1); x >= _settings.MinX; x--)
             {
-                for (int y = 0; y < _maxY; y++)
+                for (int y = _settings.MinY; y < _settings.MaxY; y++)
                 {
-                    for (int z = 0; z < _maxZ; z++)
+                    for (int z = _settings.MinZ; z < _settings.MaxZ; z++)
                     {
-                        var currentVoxel = _entry.BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
-                        var forwardVoxel = _entry.BlockOrNothing(x - 1, y, z);
-                        var behindVoxel = _entry.BlockOrNothing(x + 1, y, z);
+                        var currentVoxel = BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
+                        var forwardVoxel = BlockOrNothing(x - 1, y, z);
+                        var behindVoxel = BlockOrNothing(x + 1, y, z);
 
                         if (ShouldDrawSolidFace(currentVoxel, forwardVoxel, out var color))
                         {
@@ -186,15 +182,15 @@ namespace RealMode.Visualization.Voxels
             var solid = MeshData.GetNew();
             var transparent = MeshData.GetNew();
 
-            for (int y = 0; y < _maxY; y++)
+            for (int y = _settings.MinY; y < _settings.MaxY; y++)
             {
-                for (int x = 0; x < _maxX; x++)
+                for (int x = _settings.MinX; x < _settings.MaxX; x++)
                 {
-                    for (int z = 0; z < _maxZ; z++)
+                    for (int z = _settings.MinZ; z < _settings.MaxZ; z++)
                     {
-                        var currentVoxel = _entry.BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
-                        var forwardVoxel = _entry.BlockOrNothing(x, y + 1, z);
-                        var behindVoxel = _entry.BlockOrNothing(x, y - 1, z);
+                        var currentVoxel = BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
+                        var forwardVoxel = BlockOrNothing(x, y + 1, z);
+                        var behindVoxel = BlockOrNothing(x, y - 1, z);
 
                         if (ShouldDrawSolidFace(currentVoxel, forwardVoxel, out var color))
                         {
@@ -217,15 +213,15 @@ namespace RealMode.Visualization.Voxels
             var solid = MeshData.GetNew();
             var transparent = MeshData.GetNew();
 
-            for (int y = (_maxY - 1); y >= 0; y--)
+            for (int y = (_settings.MaxY - 1); y >= _settings.MinY; y--)
             {
-                for (int x = 0; x < _maxX; x++)
+                for (int x = _settings.MinX; x < _settings.MaxX; x++)
                 {
-                    for (int z = 0; z < _maxZ; z++)
+                    for (int z = _settings.MinZ; z < _settings.MaxZ; z++)
                     {
-                        var currentVoxel = _entry.BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
-                        var forwardVoxel = _entry.BlockOrNothing(x, y - 1, z);
-                        var behindVoxel = _entry.BlockOrNothing(x, y + 1, z);
+                        var currentVoxel = BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
+                        var forwardVoxel = BlockOrNothing(x, y - 1, z);
+                        var behindVoxel = BlockOrNothing(x, y + 1, z);
 
                         if (ShouldDrawSolidFace(currentVoxel, forwardVoxel, out var color))
                         {
@@ -248,15 +244,15 @@ namespace RealMode.Visualization.Voxels
             var solid = MeshData.GetNew();
             var transparent = MeshData.GetNew();
 
-            for (int z = 0; z < _maxZ; z++)
+            for (int z = _settings.MinZ; z < _settings.MaxZ; z++)
             {
-                for (int x = 0; x < _maxX; x++)
+                for (int x = _settings.MinX; x < _settings.MaxX; x++)
                 {
-                    for (int y = 0; y < _maxY; y++)
+                    for (int y = _settings.MinY; y < _settings.MaxY; y++)
                     {
-                        var currentVoxel = _entry.BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
-                        var forwardVoxel = _entry.BlockOrNothing(x, y, z + 1);
-                        var behindVoxel = _entry.BlockOrNothing(x, y, z - 1);
+                        var currentVoxel = BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
+                        var forwardVoxel = BlockOrNothing(x, y, z + 1);
+                        var behindVoxel = BlockOrNothing(x, y, z - 1);
 
                         if (ShouldDrawSolidFace(currentVoxel, forwardVoxel, out var color))
                         {
@@ -279,15 +275,15 @@ namespace RealMode.Visualization.Voxels
             var solid = MeshData.GetNew();
             var transparent = MeshData.GetNew();
 
-            for (int z = (_maxZ - 1); z >= 0; z--)
+            for (int z = (_settings.MaxZ - 1); z >= _settings.MinZ; z--)
             {
-                for (int x = 0; x < _maxX; x++)
+                for (int x = _settings.MinX; x < _settings.MaxX; x++)
                 {
-                    for (int y = 0; y < _maxY; y++)
+                    for (int y = _settings.MinY; y < _settings.MaxY; y++)
                     {
-                        var currentVoxel = _entry.BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
-                        var forwardVoxel = _entry.BlockOrNothing(x, y, z - 1);
-                        var behindVoxel = _entry.BlockOrNothing(x, y, z + 1);
+                        var currentVoxel = BlockOrNothing(x, y, z) ?? throw new($"x: {x}, y: {y}, z: {z}");
+                        var forwardVoxel = BlockOrNothing(x, y, z - 1);
+                        var behindVoxel = BlockOrNothing(x, y, z + 1);
 
                         if (ShouldDrawSolidFace(currentVoxel, forwardVoxel, out var color))
                         {
@@ -303,6 +299,17 @@ namespace RealMode.Visualization.Voxels
             }
 
             return (solid, transparent);
+        }
+
+        private int? BlockOrNothing(int x, int y, int z)
+        {
+            if (x < _settings.MinX || x >= _settings.MaxX)
+                return null;
+            if (y < _settings.MinY || y >= _settings.MaxY)
+                return null;
+            if (z < _settings.MinZ || z >= _settings.MaxZ)
+                return null;
+            return _entry.BlockOrNothing(x, y, z);
         }
 
         private bool ShouldDrawSolidFace(int voxel, int? other, out Color32 color)

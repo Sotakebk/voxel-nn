@@ -1,11 +1,11 @@
 using UnityEngine;
 
-namespace RealMode.Visualization.Voxels
+namespace RealMode.Visualization.Pixels
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshCollider))]
-    public class VisualizationElement : MonoBehaviour
+    public class PixelMeshElement : MonoBehaviour
     {
         private Mesh _mesh = null!;
 
@@ -23,17 +23,17 @@ namespace RealMode.Visualization.Voxels
             Destroy(_mesh);
         }
 
-        public static VisualizationElement ConstructOnNewGameObject(string goName, Material material, Transform parent)
+        public static PixelMeshElement ConstructOnNewGameObject(string goName, Material material, Transform parent)
         {
             var go = new GameObject(goName,
                 typeof(MeshFilter),
                 typeof(MeshRenderer),
                 typeof(MeshCollider),
-                typeof(VisualizationElement));
+                typeof(PixelMeshElement));
 
             go.GetComponent<MeshRenderer>().sharedMaterial = material;
             go.transform.parent = parent;
-            return go.GetComponent<VisualizationElement>();
+            return go.GetComponent<PixelMeshElement>();
         }
     }
 }

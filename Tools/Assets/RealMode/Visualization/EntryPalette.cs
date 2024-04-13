@@ -8,7 +8,7 @@ namespace RealMode.Visualization
         private static readonly Color32 Unkown = Color.magenta;
         private readonly Dictionary<int, Color32> _colors;
 
-        public EntryPalette(Palette palette, Entry3D entry)
+        public EntryPalette(Palette palette, Entry entry)
         {
             _colors = new Dictionary<int, Color32>();
             foreach (var pair in entry.IndexToNameDict)

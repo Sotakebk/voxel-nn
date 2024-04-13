@@ -53,43 +53,65 @@ namespace RealMode.Visualization.Voxels
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public CurrentVisualizationSettings ToCurrentSettings()
+        {
+            return new CurrentVisualizationSettings()
+            {
+                MinX = _minX,
+                MaxX = _maxX,
+                MinY = _minY,
+                MaxY = _maxY,
+                MinZ = _minZ,
+                MaxZ = _maxZ
+            };
+        }
+    }
+
+    public struct CurrentVisualizationSettings
+    {
+        public int MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
     }
 
     public class VoxelVisualizer : MonoBehaviour
     {
+        [SerializeReference] private VisualizationService _visualizationService = null!;
+        [SerializeReference] private PaletteManager paletteManager = null!;
         [SerializeReference] private Material _solidMaterial = null!;
         [SerializeReference] private Material _transparentMaterial = null!;
         [SerializeReference] private Transform _baseCubeTransform = null!;
-        private VisualizationElement[] _solidVisualizationElements = Array.Empty<VisualizationElement>();
-        private VisualizationElement[] _transparentVisualizationElements = Array.Empty<VisualizationElement>();
+        private VoxelMeshElement[] _solidMeshElements = Array.Empty<VoxelMeshElement>();
+        private VoxelMeshElement[] _transparentMeshElements = Array.Empty<VoxelMeshElement>();
         [SerializeField] private VoxelVisualizerSettings _settings = new VoxelVisualizerSettings();
+        private bool _shouldRedrawModel;
 
         public VoxelVisualizerSettings Settings => _settings;
 
         private void Awake()
         {
-            _solidVisualizationElements = new VisualizationElement[6];
-            _transparentVisualizationElements = new VisualizationElement[6];
+            _solidMeshElements = new VoxelMeshElement[6];
+            _transparentMeshElements = new VoxelMeshElement[6];
             for (int i = 0; i < 6; i++)
             {
-                _solidVisualizationElements[i] =
-                    VisualizationElement.ConstructOnNewGameObject($"Solid {i}", _solidMaterial, transform);
+                _solidMeshElements[i] =
+                    VoxelMeshElement.ConstructOnNewGameObject($"Solid {i}", _solidMaterial, transform);
             }
 
             for (int i = 0; i < 6; i++)
             {
-                _transparentVisualizationElements[i] =
-                    VisualizationElement.ConstructOnNewGameObject($"Transparent {i}", _transparentMaterial, transform);
+                _transparentMeshElements[i] =
+                    VoxelMeshElement.ConstructOnNewGameObject($"Transparent {i}", _transparentMaterial, transform);
             }
+            _settings.PropertyChanged += _settings_PropertyChanged;
         }
 
         public void Clear()
         {
-            foreach (var element in _solidVisualizationElements)
+            foreach (var element in _solidMeshElements)
             {
                 element.ClearMesh();
             }
-            foreach (var element in _transparentVisualizationElements)
+            foreach (var element in _transparentMeshElements)
             {
                 element.ClearMesh();
             }
@@ -99,13 +121,13 @@ namespace RealMode.Visualization.Voxels
         public void Visualize(Entry3D entry, Palette palette)
         {
             Clear();
-
-            var (solidMeshes, transparentMeshes) = VoxelMeshingLogic.GenerateMesh(entry, palette);
+            var settings = _settings.ToCurrentSettings();
+            var (solidMeshes, transparentMeshes) = PixelMeshingLogic.GenerateMesh(entry, palette, settings);
 
             for (int i = 0; i < 6; i++)
             {
                 var mesh = solidMeshes[i];
-                var element = _solidVisualizationElements[i];
+                var element = _solidMeshElements[i];
 
                 element.ApplyMesh(mesh);
             }
@@ -113,13 +135,18 @@ namespace RealMode.Visualization.Voxels
             for (int i = 0; i < 6; i++)
             {
                 var mesh = transparentMeshes[i];
-                var element = _transparentVisualizationElements[i];
+                var element = _transparentMeshElements[i];
 
                 element.ApplyMesh(mesh);
             }
 
             gameObject.SetActive(true);
             ScaleBaseCube(entry);
+        }
+
+        private void _settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            _shouldRedrawModel = true;
         }
 
         private void ScaleBaseCube(Entry3D entry)
@@ -129,6 +156,39 @@ namespace RealMode.Visualization.Voxels
             var z = entry.SizeZ;
             _baseCubeTransform.position = new Vector3(x, y, z) / 2f;
             _baseCubeTransform.localScale = new Vector3(x, y, z);
+        }
+
+        public void VisualizeCurrentEntry()
+        {
+            _shouldRedrawModel = true;
+            var currEntry = _visualizationService.CurrentEntry;
+            if (currEntry.IsEntry3D())
+            {
+                var entry = _visualizationService.CurrentEntry.AsEntry3D();
+                _settings.MinX = 0;
+                _settings.MaxX = entry.SizeX;
+                _settings.MinY = 0;
+                _settings.MaxY = entry.SizeY;
+                _settings.MinZ = 0;
+                _settings.MaxZ = entry.SizeZ;
+            }
+        }
+
+        private void Update()
+        {
+            if (_shouldRedrawModel)
+            {
+                _shouldRedrawModel = false;
+                var currEntry = _visualizationService.CurrentEntry;
+                if (currEntry.IsEntry3D())
+                {
+                    Visualize(currEntry.AsEntry3D(), paletteManager.CurrentPalette);
+                }
+                else
+                {
+                    Clear();
+                }
+            }
         }
     }
 }

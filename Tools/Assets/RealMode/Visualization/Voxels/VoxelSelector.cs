@@ -8,7 +8,7 @@ namespace RealMode.Visualization.Voxels
     {
         [SerializeReference] TargetVoxelPresenter _targetVoxelPresenter = null!;
         [SerializeReference] Transform _selectorCube = null!;
-        [SerializeReference] ActiveEntryService _selectedEntryService = null!;
+        [SerializeReference] VisualizationService _visualizationService = null!;
 
         private Camera _camera = null!;
 
@@ -25,7 +25,7 @@ namespace RealMode.Visualization.Voxels
                 var point = info.point - (info.normal / 2f);
                 point = new Vector3(Mathf.Floor(point.x), Mathf.Floor(point.y), Mathf.Floor(point.z));
 
-                var currentEntry = _selectedEntryService.CurrentEntry?.AsEntry3D();
+                var currentEntry = _visualizationService.CurrentEntry?.AsEntry3D();
                 if (currentEntry == null)
                     throw new System.Exception("Hit, but no entry loaded?");
 
