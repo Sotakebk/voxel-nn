@@ -11,6 +11,7 @@ namespace RealMode.Presentation
 
         // set from Unity
         [SerializeField] protected VisualTreeAsset viewAsset = null!;
+
         protected VisualElement _view = null!;
 
         private void LateUpdate()

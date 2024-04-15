@@ -1,4 +1,3 @@
-using RealMode.Visualization;
 using RealMode.Visualization.Voxels;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,7 +9,7 @@ namespace RealMode.Presentation.EntryView
         public override string ViewName => "View";
 
         [SerializeReference] private VoxelVisualizer _voxelVisualizer = null!;
-        [SerializeReference] private VisualizationService _visualizationService = null!;
+        [SerializeReference] private SelectedEntryService _selectedEntryService = null!;
 
         private VisualElement _rangeSlidersContainer = null!;
         private Button _toggleRangeSlidersButton;
@@ -33,10 +32,10 @@ namespace RealMode.Presentation.EntryView
             sliderY.RegisterValueChangedCallback(sliderY_ValueChanged);
             sliderZ.RegisterValueChangedCallback(sliderZ_ValueChanged);
             UpdateSliders();
-            _visualizationService.OnEntryChangedOrModified += _visualizationService_OnEntryChangedOrModified;
+            _selectedEntryService.OnSelectedEntryChanged += _selectedEntryService_OnSelectedEntryChanged;
         }
 
-        private void _visualizationService_OnEntryChangedOrModified(VisualizationService sender)
+        private void _selectedEntryService_OnSelectedEntryChanged(SelectedEntryService sender)
         {
             ToggleSlidersActive(sender.CurrentEntry.IsEntry3D());
         }
@@ -55,24 +54,24 @@ namespace RealMode.Presentation.EntryView
 
         private void UpdateSliders()
         {
-            if (!_visualizationService.CurrentEntry.IsEntry3D())
+            if (!_selectedEntryService.CurrentEntry.IsEntry3D())
                 return;
 
-            var currentEntry = _visualizationService.CurrentEntry.AsEntry3D();
+            var entry3d = _selectedEntryService.CurrentEntry.AsEntry3D();
             var settings = _voxelVisualizer.Settings;
             sliderX.SetValueWithoutNotify(new Vector2(settings.MinX, settings.MaxX));
             sliderX.lowLimit = 0;
-            sliderX.highLimit = currentEntry.SizeX;
+            sliderX.highLimit = entry3d.SizeX;
             sliderX.label = $"X: {settings.MinX}-{settings.MaxX}";
 
             sliderY.SetValueWithoutNotify(new Vector2(settings.MinY, settings.MaxY));
             sliderY.lowLimit = 0;
-            sliderY.highLimit = currentEntry.SizeY;
+            sliderY.highLimit = entry3d.SizeY;
             sliderY.label = $"Y: {settings.MinY}-{settings.MaxY}";
 
             sliderZ.SetValueWithoutNotify(new Vector2(settings.MinZ, settings.MaxZ));
             sliderZ.lowLimit = 0;
-            sliderZ.highLimit = currentEntry.SizeZ;
+            sliderZ.highLimit = entry3d.SizeZ;
             sliderZ.label = $"Z: {settings.MinZ}-{settings.MaxZ}";
         }
 

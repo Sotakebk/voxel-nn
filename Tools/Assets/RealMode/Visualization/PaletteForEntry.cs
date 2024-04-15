@@ -3,26 +3,22 @@ using UnityEngine;
 
 namespace RealMode.Visualization
 {
-    public class EntryPalette
+    public class PaletteForEntry
     {
-        private static readonly Color32 Unkown = Color.magenta;
         private readonly Dictionary<int, Color32> _colors;
 
-        public EntryPalette(Palette palette, Entry entry)
+        public PaletteForEntry(Palette palette, Entry entry)
         {
             _colors = new Dictionary<int, Color32>();
             foreach (var pair in entry.IndexToNameDict)
             {
-                _colors.Add(pair.Key, palette.Colors[pair.Value]);
+                _colors.Add(pair.Key, palette.GetColor(pair.Value));
             }
         }
 
         public Color32 ColorForIndex(int index)
         {
-            if (_colors.TryGetValue(index, out var value))
-                return value;
-
-            return Unkown;
+            return _colors[index];
         }
     }
 }

@@ -11,7 +11,6 @@ namespace RealMode.Presentation
 
         private const int MaxLogCount = 100;
 
-
         [SerializeReference] private VisualTreeAsset _logTemplate = null!;
         private Toggle _saveStackTraceToggle = null!;
         private VisualElement _logContainer = null!;
@@ -46,7 +45,6 @@ namespace RealMode.Presentation
         {
             SaveStackTrace = evt.newValue;
         }
-
 
         private void AddLogElement(LogType type, string message, string stackTrace)
         {

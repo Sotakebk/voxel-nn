@@ -8,7 +8,7 @@ namespace RealMode.Visualization.Pixels
     {
         [SerializeReference] private TargetVoxelPresenter _targetVoxelPresenter = null!;
         [SerializeReference] private Transform _selectorPlane = null!;
-        [SerializeReference] private VisualizationService _visualizationService = null!;
+        [SerializeReference] private SelectedEntryService _selectedEntryService = null!;
 
         private Camera _camera = null!;
         private Plane _plane;
@@ -21,30 +21,50 @@ namespace RealMode.Visualization.Pixels
 
         private void LateUpdate()
         {
-            var ray = _camera.ScreenPointToRay(Input.mousePosition);
-            _plane.Raycast(ray, out float enter);
-            var point = ray.GetPoint(enter);
-            var x = Mathf.FloorToInt(point.x);
-            var y = Mathf.FloorToInt(point.y);
-
-            var currentEntry = _visualizationService.CurrentEntry?.AsEntry2D();
-            if (currentEntry == null)
-                throw new System.Exception("Hit, but no entry loaded?");
-
-            var index = currentEntry.BlockOrNothing(x, y);
-            if (index == null)
+            var currentEntry = _selectedEntryService.CurrentEntry;
+            if (currentEntry.IsEntry2D())
             {
-                _targetVoxelPresenter.ClearTargetElement();
-                _selectorPlane.gameObject.SetActive(false);
+                var entry2d = currentEntry.AsEntry2D();
+
+                var ray = _camera.ScreenPointToRay(Input.mousePosition);
+                _plane.Raycast(ray, out float enter);
+                var point = ray.GetPoint(enter);
+                var x = Mathf.FloorToInt(point.x);
+                var y = Mathf.FloorToInt(point.y);
+
+                var index = entry2d.BlockOrNothing(x, y);
+                if (index == null)
+                {
+                    ClearTarget();
+                }
+                else
+                {
+                    var name = currentEntry.IndexToNameDict[index.Value];
+                    SetTarget(name, x, y);
+                }
             }
             else
             {
-                var name = currentEntry.IndexToNameDict[index.Value];
-
-                _targetVoxelPresenter.UpdateTargetElement(name, new Vector2(x, y));
-                _selectorPlane.position = new Vector3(x + 0.5f, y + 0.5f, 0);
-                _selectorPlane.gameObject.SetActive(true);
+                ClearTarget();
             }
+        }
+
+        private void ClearTarget()
+        {
+            _targetVoxelPresenter.ClearTargetElement();
+            _selectorPlane.gameObject.SetActive(false);
+        }
+
+        private void SetTarget(string name, int x, int y)
+        {
+            _targetVoxelPresenter.UpdateTargetElement(name, new Vector2(x, y));
+            _selectorPlane.position = new Vector3(x + 0.5f, y + 0.5f, 0);
+            _selectorPlane.gameObject.SetActive(true);
+        }
+
+        private void OnDisable()
+        {
+            _targetVoxelPresenter.ClearTargetElement();
         }
     }
 }

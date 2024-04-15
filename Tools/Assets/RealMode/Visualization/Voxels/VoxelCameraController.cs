@@ -11,7 +11,7 @@ namespace RealMode.Visualization.Voxels
             Orthographic
         }
 
-        [SerializeReference] private VisualizationService _visualizationService = null!;
+        [SerializeReference] private SelectedEntryService _selectedEntryService = null!;
         private CameraMode _currentCameraMode;
         [SerializeField] private float _perspectiveFov = 80;
         [SerializeField] private float _mouseSensitivity = 4;
@@ -27,10 +27,10 @@ namespace RealMode.Visualization.Voxels
         private void Awake()
         {
             _camera = GetComponent<Camera>();
-            _visualizationService.OnEntryChangedOrModified += _visualizationService_OnEntryChangedOrModified;
+            _selectedEntryService.OnSelectedEntryChanged += _selectedEntryService_OnSelectedEntryChanged; ;
         }
 
-        private void _visualizationService_OnEntryChangedOrModified(VisualizationService sender)
+        private void _selectedEntryService_OnSelectedEntryChanged(SelectedEntryService sender)
         {
             ResetPositioning();
         }
@@ -116,10 +116,10 @@ namespace RealMode.Visualization.Voxels
 
         private void ResetPositioning()
         {
-            var currentEntry = _visualizationService.CurrentEntry;
+            var currentEntry = _selectedEntryService.CurrentEntry;
             if (currentEntry.IsEntry3D())
             {
-                var entry = _visualizationService.CurrentEntry as Entry3D ?? throw new System.Exception();
+                var entry = _selectedEntryService.CurrentEntry as Entry3D ?? throw new System.Exception();
                 var x = entry.SizeX;
                 var y = entry.SizeY;
                 var z = entry.SizeZ;

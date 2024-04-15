@@ -1,6 +1,6 @@
 namespace RealMode.Presentation.SerializationView
 {
-    public class SerializationPanelController : BasePresenter
+    public class SerializationPanelPresenter : BasePresenter
     {
         public override string ViewName => "Serialization";
     }

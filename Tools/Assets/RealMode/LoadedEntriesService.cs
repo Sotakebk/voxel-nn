@@ -5,30 +5,29 @@ namespace RealMode
 {
     public class LoadedEntriesService : MonoBehaviour
     {
-        private List<Entry3D> _loadedEntries = new List<Entry3D>();
-        private object _lock = new object();
+        public delegate void EntryCollectionsChangedEventHandler(LoadedEntriesService sender);
 
-        public delegate void LoadedEntriesUpdatedEventHandler(LoadedEntriesService sender);
-
-        public event LoadedEntriesUpdatedEventHandler? OnEntriesUpdated;
+        public event EntryCollectionsChangedEventHandler? OnCollectionsChanged;
 
         private bool _shouldTriggerEvent = false;
+        private readonly object _lock = new object();
 
+        private List<EntryCollection> _entryCollections = new List<EntryCollection>();
 
-        public IEnumerable<Entry3D> GetLoadedEntries()
+        public IEnumerable<EntryCollection> GetCurrentlyLoadedEntryCollections()
         {
             lock (_lock)
-                return _loadedEntries.ToArray();
+                return _entryCollections.ToArray();
         }
 
-        public bool AddEntry(Entry3D entry)
+        public bool AddEntryCollection(EntryCollection collection)
         {
             var valueToReturn = false;
             lock (_lock)
             {
-                if (!_loadedEntries.Contains(entry))
+                if (!_entryCollections.Contains(collection))
                 {
-                    _loadedEntries.Add(entry);
+                    _entryCollections.Add(collection);
                     valueToReturn = true;
                 }
             }
@@ -36,12 +35,12 @@ namespace RealMode
             return valueToReturn;
         }
 
-        public bool RemoveEntry(Entry3D entry)
+        public bool RemoveEntryCollection(EntryCollection collection)
         {
             var valueToReturn = false;
             lock (_lock)
             {
-                valueToReturn = _loadedEntries.Remove(entry);
+                valueToReturn = _entryCollections.Remove(collection);
             }
             if (valueToReturn)
                 _shouldTriggerEvent = true;
@@ -53,7 +52,7 @@ namespace RealMode
             if (_shouldTriggerEvent)
             {
                 _shouldTriggerEvent = false;
-                OnEntriesUpdated?.Invoke(this);
+                OnCollectionsChanged?.Invoke(this);
             }
         }
     }

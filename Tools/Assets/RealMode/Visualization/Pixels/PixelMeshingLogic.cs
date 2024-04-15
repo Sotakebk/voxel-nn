@@ -38,11 +38,11 @@ namespace RealMode.Visualization.Pixels
         }
 
         private readonly Entry2D _entry;
-        private readonly EntryPalette _palette;
+        private readonly PaletteForEntry _palette;
 
         public PixelMeshingContext(Entry2D entry, Palette palette)
         {
-            _palette = new EntryPalette(palette, entry);
+            _palette = new PaletteForEntry(palette, entry);
             _entry = entry;
         }
 

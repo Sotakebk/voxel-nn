@@ -5,7 +5,7 @@ namespace RealMode.Visualization.Voxels
     [RequireComponent(typeof(Camera))]
     public class PixelCameraControler : MonoBehaviour
     {
-        [SerializeReference] private VisualizationService _visualizationService = null!;
+        [SerializeReference] private SelectedEntryService _selectedEntryService = null!;
         [SerializeField] private float _zoom = 30;
         private bool _isDragging = false;
         private Vector2 _targetPosition;
@@ -17,10 +17,10 @@ namespace RealMode.Visualization.Voxels
         {
             _plane = new Plane(Vector3.back, 0);
             _camera = GetComponent<Camera>();
-            _visualizationService.OnEntryChangedOrModified += _visualizationService_OnEntryChangedOrModified;
+            _selectedEntryService.OnSelectedEntryChanged += _selectedEntryService_OnSelectedEntryChanged;
         }
 
-        private void _visualizationService_OnEntryChangedOrModified(VisualizationService sender)
+        private void _selectedEntryService_OnSelectedEntryChanged(SelectedEntryService sender)
         {
             ResetPositioning();
         }
@@ -71,10 +71,10 @@ namespace RealMode.Visualization.Voxels
 
         private void ResetPositioning()
         {
-            var currentEntry = _visualizationService.CurrentEntry;
+            var currentEntry = _selectedEntryService.CurrentEntry;
             if (currentEntry.IsEntry2D())
             {
-                var entry = _visualizationService.CurrentEntry as Entry2D ?? throw new System.Exception();
+                var entry = _selectedEntryService.CurrentEntry as Entry2D ?? throw new System.Exception();
                 var x = entry.SizeX;
                 var y = entry.SizeY;
                 _targetPosition = new Vector2(x + 1, y + 1) / 2f;

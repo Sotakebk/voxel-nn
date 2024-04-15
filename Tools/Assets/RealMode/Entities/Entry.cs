@@ -66,6 +66,7 @@ namespace RealMode
         {
             return entry as Entry2D != null;
         }
+
         public static bool IsEntry3D(this Entry entry)
         {
             return entry as Entry3D != null;

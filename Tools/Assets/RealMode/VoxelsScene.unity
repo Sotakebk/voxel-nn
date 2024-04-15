@@ -142,6 +142,7 @@ GameObject:
   - component: {fileID: 20263866}
   - component: {fileID: 20263865}
   - component: {fileID: 20263864}
+  - component: {fileID: 20263867}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -169,6 +170,7 @@ MonoBehaviour:
   - {fileID: 20263866}
   - {fileID: 20263865}
   - {fileID: 20263864}
+  - {fileID: 20263867}
   _serverStatePresenter: {fileID: 20263861}
   _longActionPresenter: {fileID: 20263860}
   _targetVoxelPresenter: {fileID: 20263862}
@@ -272,7 +274,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewAsset: {fileID: 9197481963319205126, guid: 0b4a971a44aec044aa03e4f3c1955acd, type: 3}
   _voxelVisualizer: {fileID: 1681777245}
-  _visualizationService: {fileID: 1902379104}
+  _selectedEntryService: {fileID: 879607673}
 --- !u!114 &20263864
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,6 +315,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewAsset: {fileID: 9197481963319205126, guid: 125bd5cc713e3574db40b9739ae7e686, type: 3}
+--- !u!114 &20263867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20263854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62e395cb85fe70e4f8da79ff2afc0d8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewAsset: {fileID: 9197481963319205126, guid: 8637ce7bb4c80b743a08e2e302b59861, type: 3}
 --- !u!1 &24847239
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,7 +341,7 @@ GameObject:
   - component: {fileID: 24847242}
   - component: {fileID: 24847241}
   m_Layer: 0
-  m_Name: Quad
+  m_Name: Selector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -525,7 +540,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c5ecffe1f1214c46859d0982e2f513b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _visualizationService: {fileID: 1902379104}
+  _selectedEntryService: {fileID: 879607673}
   _perspectiveFov: 80
   _mouseSensitivity: 4
   _distance: 0
@@ -543,7 +558,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetVoxelPresenter: {fileID: 20263862}
   _selectorCube: {fileID: 416439387}
-  _visualizationService: {fileID: 1902379104}
+  _selectedEntryService: {fileID: 879607673}
 --- !u!1 &416439386
 GameObject:
   m_ObjectHideFlags: 0
@@ -676,7 +691,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetVoxelPresenter: {fileID: 20263862}
   _selectorPlane: {fileID: 24847240}
-  _visualizationService: {fileID: 1902379104}
+  _selectedEntryService: {fileID: 879607673}
 --- !u!114 &794314558
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -689,7 +704,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8224f78f137017b4fbf5419f2c1359c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _visualizationService: {fileID: 1902379104}
+  _selectedEntryService: {fileID: 879607673}
   _zoom: 30
 --- !u!81 &794314559
 AudioListener:
@@ -762,6 +777,9 @@ GameObject:
   - component: {fileID: 879607669}
   - component: {fileID: 879607670}
   - component: {fileID: 879607672}
+  - component: {fileID: 879607674}
+  - component: {fileID: 879607673}
+  - component: {fileID: 879607675}
   m_Layer: 0
   m_Name: Logic
   m_TagString: Untagged
@@ -821,6 +839,50 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _port: 9001
+--- !u!114 &879607673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879607667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6345debfd74e54d8cc857f2b0c6d80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &879607674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879607667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dac3ac4f000fd845a888802a1938e64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _filesService: {fileID: 879607675}
+  _currentPalette:
+    rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+--- !u!114 &879607675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879607667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7065c0926a27edc46824b4bbac556e6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1021231119
 GameObject:
   m_ObjectHideFlags: 0
@@ -1058,17 +1120,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _visualizationService: {fileID: 1902379104}
-  paletteManager: {fileID: 1902379106}
+  _paletteService: {fileID: 879607674}
+  _selectedEntryService: {fileID: 879607673}
   _solidMaterial: {fileID: 2100000, guid: a6e6f049b4d7c9b44afbf68f3a659d30, type: 2}
   _transparentMaterial: {fileID: 2100000, guid: 8bf22a12ab376544ab79fb58e9dc4097, type: 2}
   _baseCubeTransform: {fileID: 1021231120}
-  _settings:
-    _minX: 0
-    _maxX: 0
-    _minY: 0
-    _maxY: 0
-    _minZ: 0
-    _maxZ: 0
 --- !u!1 &1902379103
 GameObject:
   m_ObjectHideFlags: 0
@@ -1079,7 +1135,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1902379105}
   - component: {fileID: 1902379104}
-  - component: {fileID: 1902379106}
   m_Layer: 0
   m_Name: Visualization
   m_TagString: Untagged
@@ -1099,8 +1154,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5086568ceff3a141ae2e27005e88dcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _visualization3DController: {fileID: 1681777245}
-  _visualization2DController: {fileID: 1938301630}
 --- !u!4 &1902379105
 Transform:
   m_ObjectHideFlags: 0
@@ -1118,25 +1171,6 @@ Transform:
   - {fileID: 1681777244}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1902379106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1902379103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86d18416206c322419b9d0b04819360b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _currentPalette:
-    rid: -2
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
 --- !u!1 &1938301628
 GameObject:
   m_ObjectHideFlags: 0
@@ -1185,7 +1219,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _visualizationService: {fileID: 1902379104}
-  paletteManager: {fileID: 1902379106}
+  _paletteService: {fileID: 879607674}
+  _selectedEntryService: {fileID: 879607673}
   _solidMaterial: {fileID: 2100000, guid: a6e6f049b4d7c9b44afbf68f3a659d30, type: 2}
   _transparentMaterial: {fileID: 2100000, guid: 8bf22a12ab376544ab79fb58e9dc4097, type: 2}
   _basePlaneTransform: {fileID: 1412510999}

@@ -1,94 +1,26 @@
 using System;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace RealMode.Visualization.Voxels
 {
-    [Serializable]
-    public class VoxelVisualizerSettings : INotifyPropertyChanged
+    public class VoxelVisualizer : BaseVisualizer
     {
-        [SerializeField] private int _minX, _maxX, _minY, _maxY, _minZ, _maxZ;
-
-        private void SetProperty<T>(ref T field, T value, [CallerMemberName] string? source = null)
-        {
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(source));
-        }
-
-        public int MinX
-        {
-            get => _minX;
-            set => SetProperty(ref _minX, value);
-        }
-
-        public int MaxX
-        {
-            get => _maxX;
-            set => SetProperty(ref _maxX, value);
-        }
-
-        public int MinY
-        {
-            get => _minY;
-            set => SetProperty(ref _minY, value);
-        }
-
-        public int MaxY
-        {
-            get => _maxY;
-            set => SetProperty(ref _maxY, value);
-        }
-
-        public int MinZ
-        {
-            get => _minZ;
-            set => SetProperty(ref _minZ, value);
-        }
-
-        public int MaxZ
-        {
-            get => _maxZ;
-            set => SetProperty(ref _maxZ, value);
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public CurrentVisualizationSettings ToCurrentSettings()
-        {
-            return new CurrentVisualizationSettings()
-            {
-                MinX = _minX,
-                MaxX = _maxX,
-                MinY = _minY,
-                MaxY = _maxY,
-                MinZ = _minZ,
-                MaxZ = _maxZ
-            };
-        }
-    }
-
-    public struct CurrentVisualizationSettings
-    {
-        public int MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
-    }
-
-    public class VoxelVisualizer : MonoBehaviour
-    {
-        [SerializeReference] private VisualizationService _visualizationService = null!;
-        [SerializeReference] private PaletteManager paletteManager = null!;
         [SerializeReference] private Material _solidMaterial = null!;
         [SerializeReference] private Material _transparentMaterial = null!;
         [SerializeReference] private Transform _baseCubeTransform = null!;
+
         private VoxelMeshElement[] _solidMeshElements = Array.Empty<VoxelMeshElement>();
         private VoxelMeshElement[] _transparentMeshElements = Array.Empty<VoxelMeshElement>();
-        [SerializeField] private VoxelVisualizerSettings _settings = new VoxelVisualizerSettings();
-        private bool _shouldRedrawModel;
 
-        public VoxelVisualizerSettings Settings => _settings;
+        private WeakReference<Entry3D> _previouslyVisualizedEntry = new WeakReference<Entry3D>(null);
 
-        private void Awake()
+        public VoxelVisualizerSettings Settings { get; private set; } = new VoxelVisualizerSettings();
+
+        protected override void Awake()
         {
+            base.Awake();
+
             _solidMeshElements = new VoxelMeshElement[6];
             _transparentMeshElements = new VoxelMeshElement[6];
             for (int i = 0; i < 6; i++)
@@ -102,10 +34,10 @@ namespace RealMode.Visualization.Voxels
                 _transparentMeshElements[i] =
                     VoxelMeshElement.ConstructOnNewGameObject($"Transparent {i}", _transparentMaterial, transform);
             }
-            _settings.PropertyChanged += _settings_PropertyChanged;
+            Settings.PropertyChanged += _settings_PropertyChanged;
         }
 
-        public void Clear()
+        protected override void Clear()
         {
             foreach (var element in _solidMeshElements)
             {
@@ -115,14 +47,33 @@ namespace RealMode.Visualization.Voxels
             {
                 element.ClearMesh();
             }
-            gameObject.SetActive(false);
         }
 
-        public void Visualize(Entry3D entry, Palette palette)
+        protected override bool CanVisualizeEntry(Entry entry)
         {
-            Clear();
-            var settings = _settings.ToCurrentSettings();
-            var (solidMeshes, transparentMeshes) = PixelMeshingLogic.GenerateMesh(entry, palette, settings);
+            return entry.IsEntry3D();
+        }
+
+        private bool ShouldResetDisplaySettings(Entry newEntry)
+        {
+            if (_previouslyVisualizedEntry.TryGetTarget(out var oldEntry))
+            {
+                if (newEntry == oldEntry)
+                    return false;
+            }
+            return true;
+        }
+
+        protected override void VisualizeEntry(Entry entry)
+        {
+            var entry3d = entry.AsEntry3D();
+
+            if (ShouldResetDisplaySettings(entry3d))
+                ResetSettings(entry3d);
+
+            var settings = Settings.ToCurrentSettings();
+
+            var (solidMeshes, transparentMeshes) = PixelMeshingLogic.GenerateMesh(entry3d, _paletteService.CurrentPalette, settings);
 
             for (int i = 0; i < 6; i++)
             {
@@ -140,13 +91,14 @@ namespace RealMode.Visualization.Voxels
                 element.ApplyMesh(mesh);
             }
 
-            gameObject.SetActive(true);
-            ScaleBaseCube(entry);
+            ScaleBaseCube(entry3d);
+            Unhide();
+            _previouslyVisualizedEntry = new WeakReference<Entry3D>(entry3d);
         }
 
         private void _settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            _shouldRedrawModel = true;
+            MarkAsDirty();
         }
 
         private void ScaleBaseCube(Entry3D entry)
@@ -158,37 +110,14 @@ namespace RealMode.Visualization.Voxels
             _baseCubeTransform.localScale = new Vector3(x, y, z);
         }
 
-        public void VisualizeCurrentEntry()
+        private void ResetSettings(Entry3D newEntry)
         {
-            _shouldRedrawModel = true;
-            var currEntry = _visualizationService.CurrentEntry;
-            if (currEntry.IsEntry3D())
-            {
-                var entry = _visualizationService.CurrentEntry.AsEntry3D();
-                _settings.MinX = 0;
-                _settings.MaxX = entry.SizeX;
-                _settings.MinY = 0;
-                _settings.MaxY = entry.SizeY;
-                _settings.MinZ = 0;
-                _settings.MaxZ = entry.SizeZ;
-            }
-        }
-
-        private void Update()
-        {
-            if (_shouldRedrawModel)
-            {
-                _shouldRedrawModel = false;
-                var currEntry = _visualizationService.CurrentEntry;
-                if (currEntry.IsEntry3D())
-                {
-                    Visualize(currEntry.AsEntry3D(), paletteManager.CurrentPalette);
-                }
-                else
-                {
-                    Clear();
-                }
-            }
+            Settings.MinX = 0;
+            Settings.MaxX = newEntry.SizeX;
+            Settings.MinY = 0;
+            Settings.MaxY = newEntry.SizeY;
+            Settings.MinZ = 0;
+            Settings.MaxZ = newEntry.SizeZ;
         }
     }
 }

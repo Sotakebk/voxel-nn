@@ -29,7 +29,6 @@ namespace RealMode.Presentation.General
             }*/
         }
 
-
         public override void PrepareView()
         {
             _dot = _view.Q(name: "statusDot");

@@ -32,13 +32,14 @@ namespace RealMode
 
     public class LongRunningActionService : MonoBehaviour
     {
-        private ConcurrentDictionary<ActionScope, ActionScope> _runningActions = new ConcurrentDictionary<ActionScope, ActionScope>();
-
         public delegate void ActionsUpdatedEventHandler(LongRunningActionService sender);
 
         public event ActionsUpdatedEventHandler? OnActionsUpdated;
 
         private bool _shouldTriggerEvent = false;
+        private readonly object _lock = new object();
+
+        private ConcurrentDictionary<ActionScope, ActionScope> _runningActions = new ConcurrentDictionary<ActionScope, ActionScope>();
 
         private void Awake()
         {
@@ -65,23 +66,31 @@ namespace RealMode
                 Name = name,
                 Completeness = 0
             };
-            _shouldTriggerEvent = true;
+            lock (_lock)
+                _shouldTriggerEvent = true;
             return scope;
         }
 
         private void RemoveLongRunningActionScope(ActionScope scope)
         {
             _runningActions.TryRemove(scope, out _);
-            _shouldTriggerEvent = true;
+            lock (_lock)
+                _shouldTriggerEvent = true;
         }
 
         private void Update()
         {
-            if (_shouldTriggerEvent)
+            var triggeringEvent = false;
+            lock (_lock)
             {
-                _shouldTriggerEvent = false;
-                OnActionsUpdated?.Invoke(this);
+                if (_shouldTriggerEvent)
+                {
+                    _shouldTriggerEvent = false;
+                    triggeringEvent = true;
+                }
             }
+            if (triggeringEvent)
+                OnActionsUpdated?.Invoke(this);
         }
     }
 }

@@ -20,7 +20,6 @@ namespace RealMode.Communication
 
         public Server(int port, IPAddress address)
         {
-
         }
 
         protected virtual void Dispose(bool disposing)

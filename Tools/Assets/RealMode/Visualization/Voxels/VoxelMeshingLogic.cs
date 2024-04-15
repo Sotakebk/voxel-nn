@@ -38,12 +38,12 @@ namespace RealMode.Visualization.Voxels
         }
 
         private readonly Entry3D _entry;
-        private readonly EntryPalette _palette;
+        private readonly PaletteForEntry _palette;
         private readonly CurrentVisualizationSettings _settings;
 
         public VoxelMeshingContext(Entry3D entry, Palette palette, CurrentVisualizationSettings settings)
         {
-            _palette = new EntryPalette(palette, entry);
+            _palette = new PaletteForEntry(palette, entry);
             _entry = entry;
             _settings = settings;
         }

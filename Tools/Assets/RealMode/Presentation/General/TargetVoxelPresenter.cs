@@ -14,7 +14,6 @@ namespace RealMode.Presentation.General
         {
             _label = _view.Q<Label>(name: "TargetVoxel");
             ClearTargetElement();
-
         }
 
         public void UpdateTargetElement(string name, Vector3 position)
@@ -27,6 +26,7 @@ namespace RealMode.Presentation.General
             _label.text = _text;
             _isVisible = true;
         }
+
         public void UpdateTargetElement(string name, Vector2 position)
         {
             var interpolated = $"{name} ({position.x}, {position.y})";
