@@ -13,6 +13,7 @@ namespace RealMode.Presentation
         [SerializeReference] private LongActionPresenter _longActionPresenter;
         [SerializeReference] private TargetVoxelPresenter _targetVoxelPresenter;
         [SerializeReference] private CurrentStatusPresenter _currentStatusPresenter;
+        [SerializeReference] private ShortcutModePresenter _shortcutModePresenter;
 
         private KeyCode[] KeyCodes;
 
@@ -43,6 +44,8 @@ namespace RealMode.Presentation
             _targetVoxelPresenter.InstantiateView(targetContainer);
             var statusContainer = _view.Q(name: "CurrentStatusContainer");
             _currentStatusPresenter.InstantiateView(statusContainer);
+            var shortcutModeContainer = _view.Q(name: "ShortcutModeContainer");
+            _shortcutModePresenter.InstantiateView(shortcutModeContainer);
         }
 
         public override void InstantiateView(VisualElement rootElement)
@@ -72,24 +75,27 @@ namespace RealMode.Presentation
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-                OnNumKeyPressed(1);
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-                OnNumKeyPressed(2);
-            if (Input.GetKeyDown(KeyCode.Alpha3))
-                OnNumKeyPressed(3);
-            if (Input.GetKeyDown(KeyCode.Alpha4))
-                OnNumKeyPressed(4);
-            if (Input.GetKeyDown(KeyCode.Alpha5))
-                OnNumKeyPressed(5);
-            if (Input.GetKeyDown(KeyCode.Alpha6))
-                OnNumKeyPressed(6);
-            if (Input.GetKeyDown(KeyCode.Alpha7))
-                OnNumKeyPressed(7);
-            if (Input.GetKeyDown(KeyCode.Alpha8))
-                OnNumKeyPressed(8);
-            if (Input.GetKeyDown(KeyCode.Alpha9))
-                OnNumKeyPressed(9);
+            if (ShortcutService.CanUseShortcuts)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1))
+                    OnNumKeyPressed(1);
+                if (Input.GetKeyDown(KeyCode.Alpha2))
+                    OnNumKeyPressed(2);
+                if (Input.GetKeyDown(KeyCode.Alpha3))
+                    OnNumKeyPressed(3);
+                if (Input.GetKeyDown(KeyCode.Alpha4))
+                    OnNumKeyPressed(4);
+                if (Input.GetKeyDown(KeyCode.Alpha5))
+                    OnNumKeyPressed(5);
+                if (Input.GetKeyDown(KeyCode.Alpha6))
+                    OnNumKeyPressed(6);
+                if (Input.GetKeyDown(KeyCode.Alpha7))
+                    OnNumKeyPressed(7);
+                if (Input.GetKeyDown(KeyCode.Alpha8))
+                    OnNumKeyPressed(8);
+                if (Input.GetKeyDown(KeyCode.Alpha9))
+                    OnNumKeyPressed(9);
+            }
         }
 
         private void OnNumKeyPressed(int i)

@@ -57,7 +57,7 @@ namespace RealMode.Visualization.Voxels
                 UpdatePosition();
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
+            if (ShortcutService.CanUseShortcuts && Input.GetKeyDown(KeyCode.R))
             {
                 ResetPositioning();
             }

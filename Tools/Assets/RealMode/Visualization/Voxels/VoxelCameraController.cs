@@ -79,7 +79,7 @@ namespace RealMode.Visualization.Voxels
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.T))
+            if (ShortcutService.CanUseShortcuts && Input.GetKeyDown(KeyCode.T))
             {
                 if (_currentCameraMode == CameraMode.Perspective)
                 {
@@ -97,7 +97,7 @@ namespace RealMode.Visualization.Voxels
                 UpdatePosition();
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
+            if (ShortcutService.CanUseShortcuts && Input.GetKeyDown(KeyCode.R))
             {
                 ResetPositioning();
             }

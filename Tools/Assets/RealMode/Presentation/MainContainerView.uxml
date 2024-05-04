@@ -3,6 +3,7 @@
     <ui:VisualElement name="Container" style="flex-shrink: 0; flex-grow: 0; width: 100%; height: 100%; justify-content: space-between;">
         <ui:VisualElement name="TopBar" class="panel-with-background backgroundPanel" style="flex-wrap: wrap; align-items: center; align-self: stretch; justify-content: space-between; flex-grow: 0; flex-direction: row; flex-shrink: 0; display: flex;">
             <ui:VisualElement name="ButtonContainer" style="flex-grow: 0; flex-direction: row; align-items: center; align-self: stretch;" />
+            <ui:VisualElement name="ShortcutModeContainer" style="flex-grow: 0;" />
         </ui:VisualElement>
         <ui:VisualElement name="ViewContainer" style="flex-grow: 1; flex-wrap: nowrap; overflow: hidden; align-self: stretch; justify-content: flex-start; align-items: stretch; visibility: visible; display: flex; flex-shrink: 1;" />
         <ui:VisualElement name="BottomBar" class="panel-with-background backgroundPanel" style="flex-grow: 0; align-self: auto; flex-direction: row; justify-content: space-between; flex-wrap: nowrap; align-items: center; opacity: 1; flex-shrink: 0;">

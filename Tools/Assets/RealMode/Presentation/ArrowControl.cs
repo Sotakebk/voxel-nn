@@ -13,11 +13,11 @@ namespace RealMode.Presentation
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            if (ShortcutService.CanUseShortcuts && Input.GetKeyDown(KeyCode.DownArrow))
             {
                 MoveVertical(false);
             }
-            else if (Input.GetKeyDown(KeyCode.UpArrow))
+            else if (ShortcutService.CanUseShortcuts && Input.GetKeyDown(KeyCode.UpArrow))
             {
                 MoveVertical(true);
             }
