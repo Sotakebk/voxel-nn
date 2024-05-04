@@ -1,15 +1,20 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/RealMode/Presentation/Styles.uss?fileID=7433441132597879392&amp;guid=82db61c79aac2a1418553cad495ff218&amp;type=3#Styles" />
     <ui:VisualElement name="VisualElement" class="viewContainer backgroundPanel" style="flex-grow: 1; justify-content: flex-start; align-self: stretch; align-items: stretch;">
-        <ui:VisualElement name="Buttons" style="flex-grow: 0; flex-direction: row; align-items: stretch; justify-content: space-around; align-self: stretch; padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px; flex-shrink: 0; flex-wrap: wrap;">
-            <ui:Button text="Serialize current entry" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SerializeEntry" />
-            <ui:Button text="Serialize all entries" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SerializeAllEntries" />
-            <ui:Button text="Deserialize and append to currently loaded entries" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeserializeAndAppend" />
-            <ui:Button text="Deserialize and replace currently loaded entries" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeserializeAndReplace" enable-rich-text="true" />
+        <ui:VisualElement name="DeserializeButtons" style="flex-grow: 0; flex-direction: row; align-items: stretch; justify-content: center; align-self: stretch; padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px; flex-shrink: 0; flex-wrap: wrap;">
+            <ui:Button text="Deserialize &amp; Replace" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeserializeReplace" />
+            <ui:Button text="Deserialize &amp; Append" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeserializeAppend" />
         </ui:VisualElement>
-        <ui:Label tabindex="-1" text="Exception text!" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ExceptionText" />
-        <ui:ScrollView vertical-scroller-visibility="AlwaysVisible" style="flex-grow: 1;">
-            <ui:TextField picking-mode="Ignore" value="text" auto-correction="false" multiline="true" name="JsonTextField" readonly="false" is-delayed="false" style="flex-grow: 1; align-self: stretch; flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-direction: row; flex-wrap: wrap; white-space: normal; -unity-text-align: upper-left; font-size: 10px;" />
+        <ui:VisualElement name="SerializeButtons" style="flex-grow: 0; flex-direction: row; align-items: stretch; justify-content: center; align-self: stretch; padding-top: 2px; padding-right: 2px; padding-bottom: 2px; padding-left: 2px; flex-shrink: 0; flex-wrap: wrap;">
+            <ui:Button text="Serialize Active" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SerializeActive" />
+            <ui:Button text="Serialize All" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SerializeAll" />
+        </ui:VisualElement>
+        <ui:VisualElement name="OtherButtons" style="flex-grow: 0; align-items: center;">
+            <ui:Button text="Clear" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Clear" />
+        </ui:VisualElement>
+        <ui:Label tabindex="-1" text="Exception text!" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ErrorLabel" style="white-space: normal;" />
+        <ui:ScrollView style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Clipboard text will be shown here..." parse-escape-sequences="true" display-tooltip-when-elided="true" name="PastedText" style="white-space: normal;" />
         </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

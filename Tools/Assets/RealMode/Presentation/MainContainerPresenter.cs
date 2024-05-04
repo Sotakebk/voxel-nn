@@ -10,9 +10,11 @@ namespace RealMode.Presentation
 
         [SerializeReference] private UIDocument _uiRoot;
         [SerializeReference] private BasePresenter[] _subViewPresenters;
-        [SerializeReference] private ServerStatePresenter _serverStatePresenter;
         [SerializeReference] private LongActionPresenter _longActionPresenter;
         [SerializeReference] private TargetVoxelPresenter _targetVoxelPresenter;
+        [SerializeReference] private CurrentStatusPresenter _currentStatusPresenter;
+
+        private KeyCode[] KeyCodes;
 
         private VisualElement viewContainer;
 
@@ -22,23 +24,25 @@ namespace RealMode.Presentation
             var buttonContainer = _view.Q(name: "ButtonContainer");
             viewContainer = _view.Q(name: "ViewContainer");
 
+            var i = 1;
             foreach (var presenter in _subViewPresenters)
             {
                 presenter.InstantiateView(viewContainer);
 
                 var showViewButton = new Button();
-                showViewButton.text = presenter.ViewName;
+                showViewButton.text = $"({i}) {presenter.ViewName}";
                 showViewButton.clicked += () => OpenView(presenter);
                 buttonContainer.Add(showViewButton);
+                i++;
             }
             OpenView(_subViewPresenters[0]);
 
-            var statusContainer = _view.Q(name: "ServerStatusContainer");
-            _serverStatePresenter.InstantiateView(statusContainer);
             var actionContainer = _view.Q(name: "ProgressBarContainer");
             _longActionPresenter.InstantiateView(actionContainer);
             var targetContainer = _view.Q(name: "TargetVoxelContainer");
             _targetVoxelPresenter.InstantiateView(targetContainer);
+            var statusContainer = _view.Q(name: "CurrentStatusContainer");
+            _currentStatusPresenter.InstantiateView(statusContainer);
         }
 
         public override void InstantiateView(VisualElement rootElement)
@@ -63,6 +67,38 @@ namespace RealMode.Presentation
                     p.Show();
                 else
                     p.Hide();
+            }
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                OnNumKeyPressed(1);
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+                OnNumKeyPressed(2);
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+                OnNumKeyPressed(3);
+            if (Input.GetKeyDown(KeyCode.Alpha4))
+                OnNumKeyPressed(4);
+            if (Input.GetKeyDown(KeyCode.Alpha5))
+                OnNumKeyPressed(5);
+            if (Input.GetKeyDown(KeyCode.Alpha6))
+                OnNumKeyPressed(6);
+            if (Input.GetKeyDown(KeyCode.Alpha7))
+                OnNumKeyPressed(7);
+            if (Input.GetKeyDown(KeyCode.Alpha8))
+                OnNumKeyPressed(8);
+            if (Input.GetKeyDown(KeyCode.Alpha9))
+                OnNumKeyPressed(9);
+        }
+
+        private void OnNumKeyPressed(int i)
+        {
+            i--;
+            if (i >= 0 && i < _subViewPresenters.Length)
+            {
+                var view = _subViewPresenters[i];
+                OpenView(view);
             }
         }
     }

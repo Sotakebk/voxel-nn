@@ -1,6 +1,7 @@
 using RealMode.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RealMode
 {
@@ -34,9 +35,51 @@ namespace RealMode
             Blocks = new int[0, 0];
         }
 
+        public Entry2D(EntryDTO entryDTO)
+        {
+            FriendlyName = entryDTO.FriendlyName;
+            Tags = (string[])entryDTO.Tags.Clone();
+            Blocks = new int[entryDTO.Dimensions[0], entryDTO.Dimensions[1]];
+            IndexToNameDict = new Dictionary<int, string>();
+            for (int i = 0; i < entryDTO.BlockNames.Length; i++)
+            {
+                IndexToNameDict[i] = entryDTO.BlockNames[i];
+            }
+            for (int x = 0; x < SizeX; x++)
+            {
+                for (int y = 0; y < SizeY; y++)
+                {
+                    Blocks[x, y] = entryDTO.Blocks[x * SizeY + y];
+                }
+            }
+        }
+
         public override EntryDTO ToDTO()
         {
-            throw new NotImplementedException();
+            var blockNames = IndexToNameDict.Select(p => p.Value).ToList();
+            var map = new Dictionary<int, int>();
+            foreach (var pair in IndexToNameDict)
+            {
+                map.Add(pair.Key, blockNames.IndexOf(pair.Value));
+            }
+
+            var blocks = new int[SizeX * SizeY];
+            for (int x = 0; x < SizeX; x++)
+            {
+                for (int y = 0; y < SizeY; y++)
+                {
+                    blocks[x * SizeY + y] = map[Blocks[x, y]];
+                }
+            }
+
+            return new EntryDTO
+            {
+                FriendlyName = FriendlyName,
+                Tags = (string[])Tags.Clone(),
+                Dimensions = new int[] { SizeX, SizeY },
+                BlockNames = blockNames.ToArray(),
+                Blocks = blocks
+            };
         }
     }
 
@@ -54,9 +97,56 @@ namespace RealMode
             Blocks = new int[0, 0, 0];
         }
 
+        public Entry3D(EntryDTO entryDTO)
+        {
+            FriendlyName = entryDTO.FriendlyName;
+            Tags = (string[])entryDTO.Tags.Clone();
+            Blocks = new int[entryDTO.Dimensions[0], entryDTO.Dimensions[1], entryDTO.Dimensions[2]];
+            IndexToNameDict = new Dictionary<int, string>();
+            for (int i = 0; i < entryDTO.BlockNames.Length; i++)
+            {
+                IndexToNameDict[i] = entryDTO.BlockNames[i];
+            }
+            for (int x = 0; x < SizeX; x++)
+            {
+                for (int y = 0; y < SizeY; y++)
+                {
+                    for (int z = 0; z < SizeZ; z++)
+                    {
+                        Blocks[x, y, z] = entryDTO.Blocks[x * SizeY * SizeZ + y * SizeZ + z];
+                    }
+                }
+            }
+        }
         public override EntryDTO ToDTO()
         {
-            throw new NotImplementedException();
+            var blockNames = IndexToNameDict.Select(p => p.Value).ToList();
+            var map = new Dictionary<int, int>();
+            foreach (var pair in IndexToNameDict)
+            {
+                map.Add(pair.Key, blockNames.IndexOf(pair.Value));
+            }
+
+            var blocks = new int[SizeX * SizeY * SizeZ];
+            for (int x = 0; x < SizeX; x++)
+            {
+                for (int y = 0; y < SizeY; y++)
+                {
+                    for (int z = 0; z < SizeZ; z++)
+                    {
+                        blocks[x * SizeY * SizeZ + y * SizeZ + z] = map[Blocks[x, y, z]];
+                    }
+                }
+            }
+
+            return new EntryDTO
+            {
+                FriendlyName = FriendlyName,
+                Tags = (string[])Tags.Clone(),
+                Dimensions = new int[] { SizeX, SizeY, SizeZ },
+                BlockNames = blockNames.ToArray(),
+                Blocks = blocks
+            };
         }
     }
 

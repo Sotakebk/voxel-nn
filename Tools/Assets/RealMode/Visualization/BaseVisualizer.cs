@@ -7,6 +7,7 @@ namespace RealMode.Visualization
         [SerializeReference] protected VisualizationService _visualizationService = null!;
         [SerializeReference] protected PaletteService _paletteService = null!;
         [SerializeReference] protected SelectedEntryService _selectedEntryService = null!;
+        [SerializeReference] protected BaseCameraController _camera = null!;
 
         private bool _shouldRedrawModel;
 
@@ -31,7 +32,11 @@ namespace RealMode.Visualization
 
         protected virtual void Unhide()
         {
-            gameObject.SetActive(true);
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+                _camera.ResetPositioning();
+            }
         }
 
         protected virtual void Hide()

@@ -112,12 +112,36 @@ namespace RealMode.Visualization.Voxels
 
         private void ResetSettings(Entry3D newEntry)
         {
-            Settings.MinX = 0;
-            Settings.MaxX = newEntry.SizeX;
-            Settings.MinY = 0;
-            Settings.MaxY = newEntry.SizeY;
-            Settings.MinZ = 0;
-            Settings.MaxZ = newEntry.SizeZ;
+            var previousSizeX = 0;
+            var previousSizeY = 0;
+            var previousSizeZ = 0;
+            if (_previouslyVisualizedEntry.TryGetTarget(out var oldEntry))
+            {
+                previousSizeX = oldEntry.SizeX;
+                previousSizeY = oldEntry.SizeY;
+                previousSizeZ = oldEntry.SizeZ;
+            }
+
+            if (Settings.MinX != 0)
+                Settings.MinX = Math.Max(0, Math.Min(Settings.MinX, newEntry.SizeX - 1));
+            if (Settings.MaxX == previousSizeX)
+                Settings.MaxX = newEntry.SizeX;
+            else
+                Settings.MaxX = Math.Min(Settings.MaxX, newEntry.SizeX);
+
+            if (Settings.MinY != 0)
+                Settings.MinY = Math.Max(0, Math.Min(Settings.MinY, newEntry.SizeY - 1));
+            if (Settings.MaxY == previousSizeY)
+                Settings.MaxY = newEntry.SizeY;
+            else
+                Settings.MaxY = Math.Min(Settings.MaxY, newEntry.SizeY);
+
+            if (Settings.MinZ != 0)
+                Settings.MinZ = Math.Max(0, Math.Min(Settings.MinZ, newEntry.SizeZ - 1));
+            if (Settings.MaxZ == previousSizeZ)
+                Settings.MaxZ = newEntry.SizeZ;
+            else
+                Settings.MaxZ = Math.Min(Settings.MaxZ, newEntry.SizeZ);
         }
     }
 }

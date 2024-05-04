@@ -14,7 +14,7 @@ namespace RealMode.Presentation
 
         protected VisualElement _view = null!;
 
-        private void LateUpdate()
+        protected virtual void LateUpdate()
         {
             if (IsVisible && IsDirty)
             {

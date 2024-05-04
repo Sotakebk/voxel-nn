@@ -3,7 +3,7 @@ using UnityEngine;
 namespace RealMode.Visualization.Voxels
 {
     [RequireComponent(typeof(Camera))]
-    public class VoxelCameraController : MonoBehaviour
+    public class VoxelCameraController : BaseCameraController
     {
         private enum CameraMode
         {
@@ -27,12 +27,6 @@ namespace RealMode.Visualization.Voxels
         private void Awake()
         {
             _camera = GetComponent<Camera>();
-            _selectedEntryService.OnSelectedEntryChanged += _selectedEntryService_OnSelectedEntryChanged; ;
-        }
-
-        private void _selectedEntryService_OnSelectedEntryChanged(SelectedEntryService sender)
-        {
-            ResetPositioning();
         }
 
         private void Update()
@@ -114,7 +108,7 @@ namespace RealMode.Visualization.Voxels
             _currentCameraMode = mode;
         }
 
-        private void ResetPositioning()
+        public override void ResetPositioning()
         {
             var currentEntry = _selectedEntryService.CurrentEntry;
             if (currentEntry.IsEntry3D())

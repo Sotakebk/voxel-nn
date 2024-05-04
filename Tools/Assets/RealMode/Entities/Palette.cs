@@ -1,4 +1,3 @@
-using RealMode.Data;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,22 +16,9 @@ namespace RealMode
             return DefaultColor;
         }
 
-        public Palette(PaletteDTO dto)
-        {
-            _colors = new Dictionary<string, Color32>(dto.Colors);
-        }
-
         public Palette(Dictionary<string, Color32> colors)
         {
             _colors = new Dictionary<string, Color32>(colors);
-        }
-
-        public PaletteDTO ToDTO()
-        {
-            return new PaletteDTO()
-            {
-                Colors = new Dictionary<string, Color32>(_colors)
-            };
         }
     }
 }

@@ -1,6 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/RealMode/Presentation/Styles.uss?fileID=7433441132597879392&amp;guid=82db61c79aac2a1418553cad495ff218&amp;type=3#Styles" />
-    <ui:VisualElement name="VisualElement" class="viewContainer" style="flex-direction: row; align-items: center; flex-grow: 0; flex-wrap: nowrap;">
-        <ui:VisualElement name="statusDot" style="width: 16px; height: 16px; background-color: rgb(255, 255, 255); border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; flex-grow: 0; flex-shrink: 0; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px;" />
-    </ui:VisualElement>
-</ui:UXML>

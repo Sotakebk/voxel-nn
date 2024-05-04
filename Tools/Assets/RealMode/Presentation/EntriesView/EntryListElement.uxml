@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/RealMode/Presentation/Styles.uss?fileID=7433441132597879392&amp;guid=82db61c79aac2a1418553cad495ff218&amp;type=3#Styles" />
+    <ui:VisualElement class="backgroundPanel">
+        <ui:VisualElement name="VisualElement" style="flex-direction: row; align-items: center; flex-grow: 1; justify-content: space-between; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; align-self: stretch; margin-top: 2px; margin-right: 2px; margin-bottom: 2px; margin-left: 2px;">
+            <ui:Label tabindex="-1" text="Name" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NameLabel" style="font-size: 12px;" />
+            <ui:VisualElement name="VisualElement" style="flex-grow: 0; flex-direction: row; align-self: center; align-items: center; justify-content: flex-end; margin-right: 0; margin-top: 0; margin-bottom: 0; margin-left: 0;">
+                <ui:Label tabindex="-1" text="2D" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DimensionsLabel" style="font-size: 10px;" />
+                <ui:Button text="View" parse-escape-sequences="true" display-tooltip-when-elided="true" name="View" style="width: 40px; height: 25px; margin-right: 4px;" />
+                <ui:Button text="↑" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Up" style="width: 25px; height: 25px;" />
+                <ui:Button text="↓" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Down" style="width: 25px; height: 25px;" />
+                <ui:Button text="Χ" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Delete" style="width: 25px; height: 25px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Foldout text="Tags" value="false" name="TagsFoldout" style="font-size: 9px; flex-grow: 1;">
+            <ui:Label tabindex="-1" text="text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text " parse-escape-sequences="true" display-tooltip-when-elided="true" name="TagsLabel" style="white-space: normal;" />
+        </ui:Foldout>
+    </ui:VisualElement>
+</ui:UXML>

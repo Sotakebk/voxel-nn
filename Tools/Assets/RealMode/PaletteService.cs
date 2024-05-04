@@ -1,8 +1,16 @@
-using RealMode.Data;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RealMode.Visualization
 {
+    [Serializable]
+    public struct NameColorPair
+    {
+        public string Name;
+        public Color32 Color;
+    }
+
     public class PaletteService : MonoBehaviour
     {
         public delegate void PaletteChangedEventHandler(PaletteService sender);
@@ -12,31 +20,10 @@ namespace RealMode.Visualization
         private bool _shouldTriggerEvent;
         private readonly object _lock = new object();
 
-        [SerializeReference] private FilesService _filesService;
-
-        private void Awake()
-        {
-            _filesService.OnDatasetPathUpdated += _filesService_OnDatasetPathUpdated;
-        }
-
-        private void _filesService_OnDatasetPathUpdated(FilesService sender)
-        {
-            if (_currentPalette == null)
-            {
-                var newPalette = sender.LoadPalette();
-                if (newPalette != null)
-                {
-                    lock (_lock)
-                    {
-                        _currentPalette = newPalette;
-                        _shouldTriggerEvent = true;
-                    }
-                }
-            }
-        }
-
-        [SerializeReference]
         private Palette _currentPalette = null!;
+
+        [SerializeField]
+        private NameColorPair[] DataToConstructPaletteFrom;
 
         public Palette CurrentPalette
         {
@@ -51,11 +38,11 @@ namespace RealMode.Visualization
 
         private void Start()
         {
-            var palette = new PaletteDTO();
-            palette.Colors["nothing"] = Color.clear;
-            palette.Colors["something"] = Color.gray;
-            palette.Colors["glass"] = new Color(0.7f, 0.7f, 0.7f, 0.5f);
-            _currentPalette = new Palette(palette);
+            var dict = new Dictionary<string, Color32>();
+            foreach (var pair in DataToConstructPaletteFrom)
+                dict.Add(pair.Name, pair.Color);
+
+            _currentPalette = new Palette(dict);
         }
 
         private void Update()

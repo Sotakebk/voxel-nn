@@ -3,7 +3,7 @@ using UnityEngine;
 namespace RealMode.Visualization.Voxels
 {
     [RequireComponent(typeof(Camera))]
-    public class PixelCameraControler : MonoBehaviour
+    public class PixelCameraController : BaseCameraController
     {
         [SerializeReference] private SelectedEntryService _selectedEntryService = null!;
         [SerializeField] private float _zoom = 30;
@@ -17,12 +17,6 @@ namespace RealMode.Visualization.Voxels
         {
             _plane = new Plane(Vector3.back, 0);
             _camera = GetComponent<Camera>();
-            _selectedEntryService.OnSelectedEntryChanged += _selectedEntryService_OnSelectedEntryChanged;
-        }
-
-        private void _selectedEntryService_OnSelectedEntryChanged(SelectedEntryService sender)
-        {
-            ResetPositioning();
         }
 
         private void Update()
@@ -69,7 +63,7 @@ namespace RealMode.Visualization.Voxels
             }
         }
 
-        private void ResetPositioning()
+        public override void ResetPositioning()
         {
             var currentEntry = _selectedEntryService.CurrentEntry;
             if (currentEntry.IsEntry2D())
