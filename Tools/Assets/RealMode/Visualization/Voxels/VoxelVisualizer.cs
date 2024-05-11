@@ -73,7 +73,7 @@ namespace RealMode.Visualization.Voxels
 
             var settings = Settings.ToCurrentSettings();
 
-            var (solidMeshes, transparentMeshes) = PixelMeshingLogic.GenerateMesh(entry3d, _paletteService.CurrentPalette, settings);
+            var (solidMeshes, transparentMeshes) = VoxelMeshingLogic.GenerateMesh(entry3d, _paletteService.CurrentPalette, settings);
 
             for (int i = 0; i < 6; i++)
             {

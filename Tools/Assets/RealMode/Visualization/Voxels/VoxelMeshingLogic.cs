@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RealMode.Visualization.Voxels
 {
-    public class PixelMeshingLogic
+    public class VoxelMeshingLogic
     {
         public static (Mesh[] solid, Mesh[] transparent) GenerateMesh(Entry3D entry, Palette palette, CurrentVisualizationSettings settings)
         {
@@ -92,8 +92,7 @@ namespace RealMode.Visualization.Voxels
             var posy = Task.Run(GoAlongAxisPositiveY);
             var posz = Task.Run(GoAlongAxisPositiveZ);
 
-            //Task.WaitAll(negx, negy, negz, posx, posy, posz);
-            Task.WaitAll(negx, posx);
+            Task.WaitAll(negx, negy, negz, posx, posy, posz);
 
             return (new[]
             {
