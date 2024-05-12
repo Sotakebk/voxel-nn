@@ -14,7 +14,7 @@ namespace RealMode.Generation
                 FriendlyName = "EmptyTerrain",
                 Blocks = new int[Size.x, Size.y, Size.z],
                 Tags = new[] { "empty-terrain" },
-                IndexToNameDict = BlockTypeHelper.NewCommonBlockTypeDictionary(BlockType.Empty)
+                IndexToNameDict = BlockTypeHelper.NewCommonBlockTypeDictionary()
             };
         }
 

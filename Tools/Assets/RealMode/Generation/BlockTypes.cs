@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace RealMode.Generation
@@ -26,12 +27,12 @@ namespace RealMode.Generation
 
     public static class BlockTypeHelper
     {
-        public static Dictionary<int, string> NewCommonBlockTypeDictionary(params BlockType[] blocks)
+        public static Dictionary<int, string> NewCommonBlockTypeDictionary()
         {
             var dict = new Dictionary<int, string>();
-            foreach (var block in blocks)
+            foreach (var value in (BlockType[])Enum.GetValues(typeof(BlockType)))
             {
-                dict.Add(block.ToId(), block.ToFriendlyString());
+                dict.Add(value.ToId(), value.ToFriendlyString());
             }
             return dict;
         }
