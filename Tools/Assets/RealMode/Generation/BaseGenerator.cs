@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace RealMode.Generation
@@ -6,17 +7,22 @@ namespace RealMode.Generation
     public abstract class BaseGenerator : MonoBehaviour
     {
         [GeneratorProperty, Name("Entries to generate"), Index(int.MinValue)]
-        public int Instances { get; set; }
+        public int Instances { get; set; } = 1;
 
         public abstract string Name { get; }
 
         public IEnumerable<Entry> Generate()
         {
             var list = new List<Entry>();
-            for (int i = 0; i < Instances; i++)
+            var l = new object();
+
+            Parallel.For(0, Instances, _ =>
             {
-                list.Add(GenerateOneEntry());
-            }
+                var entry = GenerateOneEntry();
+                lock (l)
+                    list.Add(entry);
+            });
+
             return list;
         }
 

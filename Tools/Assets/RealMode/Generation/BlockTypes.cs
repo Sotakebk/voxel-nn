@@ -5,7 +5,26 @@ namespace RealMode.Generation
 {
     public enum BlockType : int
     {
+        // general
         Empty = 0,
+        Soil,
+        Grass,
+        Sand,
+        Water,
+
+        // geology
+        Stone,
+
+        // botany
+        Wood,
+        WoodLight,
+        WoodDark,
+        Leaves,
+
+        // building materials
+        Planks,
+        Bricks,
+        Glass,
     }
 
     public static class BlockTypeExtensions
@@ -14,8 +33,7 @@ namespace RealMode.Generation
         {
             return blockType switch
             {
-                BlockType.Empty => "empty",
-                _ => "UNKNOWN"
+                _ => blockType.ToString().ToLowerInvariant()
             };
         }
 

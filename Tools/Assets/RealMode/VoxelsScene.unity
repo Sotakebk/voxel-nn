@@ -337,8 +337,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewAsset: {fileID: 9197481963319205126, guid: 94e439d5001e7d64bb87053abc99cbdf, type: 3}
   _loadedEntriesService: {fileID: 879607670}
-  Generators:
-  - {fileID: 1082799513}
+  _generatorsObject: {fileID: 1082799512}
 --- !u!114 &20263871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -952,14 +951,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DataToConstructPaletteFrom:
-  - Name: nothing
+  - Name: empty
     Color:
       serializedVersion: 2
       rgba: 0
-  - Name: something
+  - Name: soil
     Color:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4283391872
+  - Name: grass
+    Color:
+      serializedVersion: 2
+      rgba: 4280980283
+  - Name: sand
+    Color:
+      serializedVersion: 2
+      rgba: 4281648591
+  - Name: stone
+    Color:
+      serializedVersion: 2
+      rgba: 4286414205
+  - Name: wood
+    Color:
+      serializedVersion: 2
+      rgba: 4281293232
+  - Name: woodlight
+    Color:
+      serializedVersion: 2
+      rgba: 4283398090
+  - Name: wooddark
+    Color:
+      serializedVersion: 2
+      rgba: 4279316851
+  - Name: leaves
+    Color:
+      serializedVersion: 2
+      rgba: 2134493747
+  - Name: water
+    Color:
+      serializedVersion: 2
+      rgba: 2143969843
+  - Name: planks
+    Color:
+      serializedVersion: 2
+      rgba: 4280718550
+  - Name: bricks
+    Color:
+      serializedVersion: 2
+      rgba: 4280424119
+  - Name: glass
+    Color:
+      serializedVersion: 2
+      rgba: 2147352552
 --- !u!114 &879607675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -973,6 +1016,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _loadedEntriesService: {fileID: 879607670}
+  _generatorToRunImmediately: {fileID: 1082799515}
 --- !u!1 &1021231119
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,6 +1110,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1082799514}
   - component: {fileID: 1082799513}
+  - component: {fileID: 1082799515}
   m_Layer: 0
   m_Name: Generators
   m_TagString: Untagged
@@ -1100,6 +1145,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1082799515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1082799512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07f6e4142dfff0842b537c2bf1e9710e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1412510998
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using RealMode.Generation;
+using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -9,9 +10,9 @@ namespace RealMode.Presentation
     public class GenerationPresenter : BasePresenter
     {
         [SerializeReference] private LoadedEntriesService _loadedEntriesService;
+        [SerializeReference] private GameObject _generatorsObject;
 
-        [SerializeReference]
-        private BaseGenerator[] Generators;
+        private BaseGenerator[] Generators = Array.Empty<BaseGenerator>();
 
         private BaseGenerator? _selectedGenerator;
 
@@ -22,6 +23,7 @@ namespace RealMode.Presentation
 
         public override void PrepareView()
         {
+            Generators = _generatorsObject.GetComponents<BaseGenerator>();
             _generateButton = _view.Q<Button>(name: "GenerateButton");
             _parameterContainer = _view.Q(name: "ParameterContainer");
             _generatorNameLabel = _view.Q<Label>(name: "GeneratorName");
@@ -38,6 +40,8 @@ namespace RealMode.Presentation
                 button.clicked += () => SelectGenerator(generator);
                 generatorButtonsContainer.Add(button);
             }
+            if (Generators.Length > 0)
+                SelectGenerator(Generators[0]);
         }
 
         private void Generate()
@@ -71,11 +75,14 @@ namespace RealMode.Presentation
                 {
                     AddVector3IntControl(generator, property);
                 }
+                else if (property.PropertyType == typeof(Vector2Int))
+                {
+                    AddVector2IntControl(generator, property);
+                }
                 else
                 {
                     AddUnknownPropertyTypeControl(generator, property);
                 }
-                Debug.Log($"Added property {GetPropertyName(property)}");
             }
         }
 
@@ -89,6 +96,14 @@ namespace RealMode.Presentation
         {
             var control = new IntegerField(GetPropertyName(property));
             control.value = (int)property.GetValue(generator);
+            control.RegisterValueChangedCallback((arg) => property.SetValue(generator, arg.newValue));
+            _parameterContainer.Add(control);
+        }
+
+        private void AddVector2IntControl(BaseGenerator generator, PropertyInfo property)
+        {
+            var control = new Vector2IntField(GetPropertyName(property));
+            control.value = (Vector2Int)property.GetValue(generator);
             control.RegisterValueChangedCallback((arg) => property.SetValue(generator, arg.newValue));
             _parameterContainer.Add(control);
         }

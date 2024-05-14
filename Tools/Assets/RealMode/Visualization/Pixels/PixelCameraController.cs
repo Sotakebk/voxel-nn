@@ -71,8 +71,8 @@ namespace RealMode.Visualization.Voxels
                 var entry = _selectedEntryService.CurrentEntry as Entry2D ?? throw new System.Exception();
                 var x = entry.SizeX;
                 var y = entry.SizeY;
-                _targetPosition = new Vector2(x + 1, y + 1) / 2f;
-                _zoom = x * Screen.height / Screen.width * 0.5f + 0.5f;
+                _targetPosition = new Vector2(x, y) / 2f;
+                _zoom = y * Screen.height / (float)Screen.width * 0.5f + 2f;
                 UpdatePosition();
             }
         }

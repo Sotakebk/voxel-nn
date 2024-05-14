@@ -20,6 +20,7 @@ namespace RealMode.Generation
 
         protected override void ValidateProperties()
         {
+            base.ValidateProperties();
         }
     }
 }
