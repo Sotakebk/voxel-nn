@@ -47,7 +47,8 @@ class SAE(keras.Model):
                 axis=tf.range(1, tf.rank(data)-1),
             )) * self.kld_loss_weight
 
-        averages = tf.nn.conv3d(z, filters= tf.constant(self.filter, dtype=z.dtype), strides=[1]*tf.rank(data), padding='SAME')
+        averages = tf.conv(input=z, filter=tf.constant(self.filter, dtype=z.dtype),
+                           strides=[1]*tf.rank(data), padding='SAME')
 
         str_loss = tf.reduce_mean(
             tf.reduce_mean(
