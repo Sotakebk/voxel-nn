@@ -55,10 +55,10 @@ def load_model_data(group: str) -> Tuple[list, list]:
         data = json.load(f)
         return list(data["Blocks"]), list(data["Tags"])
 
-def load_model(group: str, name: str):
+def load_model(group: str, name: str, **kwargs):
     prepare_io(group)
-    keras.models.load_model(os.path.join(path_to_models, group, name))
+    return keras.models.load_model(os.path.join(path_to_models, group, name), **kwargs)
 
-def save_model(group: str, name: str, model: keras.Model):
+def save_model(group: str, name: str, model: keras.Model, **kwargs):
     prepare_io(group)
-    model.save(os.path.join(path_to_models, group, name))
+    model.save(os.path.join(path_to_models, group, name), **kwargs)

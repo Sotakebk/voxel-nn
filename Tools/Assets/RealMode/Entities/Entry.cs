@@ -56,9 +56,11 @@ namespace RealMode
 
         public override EntryDTO ToDTO()
         {
-            var blockNames = IndexToNameDict.Select(p => p.Value).ToList();
+            var set = EntryHelper.CollectUniqueBlocks(Blocks);
+            var blockNames = IndexToNameDict.Where(pair => set.Contains(pair.Key))
+                .Select(p => p.Value).ToList();
             var map = new Dictionary<int, int>();
-            foreach (var pair in IndexToNameDict)
+            foreach (var pair in IndexToNameDict.Where(pair => set.Contains(pair.Key)))
             {
                 map.Add(pair.Key, blockNames.IndexOf(pair.Value));
             }
@@ -120,9 +122,11 @@ namespace RealMode
         }
         public override EntryDTO ToDTO()
         {
-            var blockNames = IndexToNameDict.Select(p => p.Value).ToList();
+            var set = EntryHelper.CollectUniqueBlocks(Blocks);
+            var blockNames = IndexToNameDict.Where(pair => set.Contains(pair.Key))
+                .Select(p => p.Value).ToList();
             var map = new Dictionary<int, int>();
-            foreach (var pair in IndexToNameDict)
+            foreach (var pair in IndexToNameDict.Where(pair => set.Contains(pair.Key)))
             {
                 map.Add(pair.Key, blockNames.IndexOf(pair.Value));
             }
@@ -192,6 +196,27 @@ namespace RealMode
                 return null;
 
             return entry.Blocks[x, y, z];
+        }
+    }
+
+    public static class EntryHelper
+    {
+        public static HashSet<int> CollectUniqueBlocks(int[,] array)
+        {
+            var set = new HashSet<int>();
+            for (var x = 0; x < array.GetLength(0); x++)
+                for (var y = 0; y < array.GetLength(1); y++)
+                    _ = set.Add(array[x, y]);
+            return set;
+        }
+        public static HashSet<int> CollectUniqueBlocks(int[,,] array)
+        {
+            var set = new HashSet<int>();
+            for (var x = 0; x < array.GetLength(0); x++)
+                for (var y = 0; y < array.GetLength(1); y++)
+                    for (var z = 0; z < array.GetLength(2); z++)
+                        _ = set.Add(array[x, y, z]);
+            return set;
         }
     }
 }

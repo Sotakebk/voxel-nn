@@ -34,6 +34,9 @@ namespace RealMode.Generation
             private readonly OpenSimplexNoise _osn = new(new System.Random().Next());
             private double MinSoilHeight => _size.y * 0.2f;
             private double MaxSoilHeight => _size.y * 0.8f;
+            private Vector2 _randomOffset = new Vector2(
+                (float)new System.Random().NextDouble(),
+                (float)new System.Random().NextDouble()) * 100f;
 
             public TerrainBuilder(Vector2Int size)
             {
@@ -52,13 +55,13 @@ namespace RealMode.Generation
             private float GenerateSoilHeight(int x)
             {
                 var delta = MaxSoilHeight - MinSoilHeight;
-                return (float)(_osn.EvaluateFBM(x, 0, BaseFrequency, 4, 0.5, 0.5).To01Range() * delta + MinSoilHeight);
+                return (float)(_osn.EvaluateFBM(x + _randomOffset.x, 0, BaseFrequency, 4, 0.5, 0.5).To01Range() * delta + MinSoilHeight);
             }
 
             private float GenerateStoneHeight(int x)
             {
                 var delta = MaxSoilHeight - MinSoilHeight;
-                return (float)(_osn.EvaluateFBM(x, 0, BaseFrequency, 7, 0.5, 0.6).To01Range() * delta + MinSoilHeight) - 5;
+                return (float)(_osn.EvaluateFBM(x + _randomOffset.x, 0, BaseFrequency, 7, 0.5, 0.6).To01Range() * delta + MinSoilHeight) - 5;
             }
 
             private void ApplyBlocks()
@@ -106,7 +109,7 @@ namespace RealMode.Generation
                     var maxY = Mathf.CeilToInt(soilHeight);
                     for (var y = 0; y < maxY; y++)
                     {
-                        var value = _osn.EvaluateFBM(x, y, 0.1, 4, 0.6, 0.7).To01Range(); // 0 to 1
+                        var value = _osn.EvaluateFBM(x + _randomOffset.y, y + _randomOffset.x, 0.1, 4, 0.6, 0.7).To01Range(); // 0 to 1
                         value = 1 - System.Math.Abs(value - 0.5) * 2; // 0 to 1
                         var multiplier = System.Math.Min(((soilHeight) - y) / (double)soilHeight, 0.5f) * 2.0; // 0-1
                         if (value * multiplier > 0.9)
