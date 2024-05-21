@@ -29,17 +29,17 @@ class Sampling(layers.Layer):
 @keras.saving.register_keras_serializable('voxel-nn')
 class OneHot(layers.Layer):
     """Turns a tensor of indices into a tensor of one-hot vectors."""
-    def __init__(self, max_value: int, **kwargs):
+    def __init__(self, depth: int, **kwargs):
         super().__init__(**kwargs)
-        self.max_value=max_value
+        self.depth=depth
 
     def get_config(self):
         config = super().get_config()
-        config['max_value'] = self.max_value
+        config['depth'] = self.depth
         return config
 
     def build(self, input_shape = None):
         pass
 
     def call(self, inputs):
-        return tf.one_hot(inputs, self.max_value, on_value=1.0, off_value=0.0, axis=-1)
+        return tf.one_hot(inputs, self.depth, on_value=1.0, off_value=0.0, axis=-1)

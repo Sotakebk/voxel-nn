@@ -71,11 +71,11 @@ class AttentionBlock(layers.Layer):
         config['units'] = self.units
         config['groups'] = self.groups
         config['is3d'] = self.is3d
-        config['norm'] = self.norm
-        config['query'] = self.query
-        config['key'] = self.key
-        config['value'] = self.value
-        config['proj'] = self.proj
+        config['norm'] = keras.saving.serialize_keras_object(self.norm)
+        config['query'] = keras.saving.serialize_keras_object(self.query)
+        config['key'] = keras.saving.serialize_keras_object(self.key)
+        config['value'] = keras.saving.serialize_keras_object(self.value)
+        config['proj'] = keras.saving.serialize_keras_object(self.proj)
 
         return config
 

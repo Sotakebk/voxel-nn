@@ -61,9 +61,17 @@ def construct_entry_dto(friendly_name: str,
     * tags_multilabel: a one-dimensional ndarray of 1/0 markers for tag_names
     * blocks: a 2d/3d (slice of) an ndarray
     """
+
+    def tag_names_from_tags(names, indices):
+        l = []
+        for i, v in enumerate(indices):
+            if v == 1:
+                l.append(names[i])
+        return l
+
     o = {
         'FriendlyName': friendly_name,
-        'Tags': [tag_names[i] for i in tags_multilabel],
+        'Tags': tag_names_from_tags(tag_names, tags_multilabel),
         'Dimensions': blocks.shape,
         'BlockNames': block_names.copy(),
         'Blocks': np.concatenate(blocks).ravel().tolist()
