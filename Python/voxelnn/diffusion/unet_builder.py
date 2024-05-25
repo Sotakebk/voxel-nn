@@ -1,13 +1,12 @@
 """Code for building the diffusion models."""
 
-from typing import List, Tuple, Any
 import tensorflow as tf
 import keras
 from keras import layers
 from voxelnn.diffusion.custom_layers import TimeEmbedding, AttentionBlock
 from voxelnn.diffusion.utils import kernel_init
 
-def ResidualBlock(is3d: bool, filters: int, groups=8):
+def _ResidualBlock(is3d: bool, filters: int, groups: int = 8):
     def apply(inputs):
         x, t = inputs
 
@@ -45,7 +44,7 @@ def ResidualBlock(is3d: bool, filters: int, groups=8):
     return apply
 
 
-def DownSample(is3d: bool, filters: int):
+def _DownSample(is3d: bool, filters: int):
     def apply(x):
         # should this really use convolution?
         x = _conv(is3d, filters = filters, kernel_size=3, stride=2, padding="same",
@@ -55,7 +54,7 @@ def DownSample(is3d: bool, filters: int):
     return apply
 
 
-def UpSample(is3d: bool, filters: int):
+def _UpSample(is3d: bool, filters: int):
     def apply(x):
         if is3d:
             x = layers.UpSampling3D(size=(2,2,2))(x)
@@ -72,7 +71,7 @@ def UpSample(is3d: bool, filters: int):
     return apply
 
 
-def TimeMLP(units, activation_fn=keras.activations.swish):
+def _TimeMLP(units, activation_fn=keras.activations.swish):
     def apply(inputs):
         time_embedding = layers.Dense(units, activation=activation_fn, kernel_initializer=kernel_init(1.0))(inputs)
         time_embedding = layers.Dense(units, kernel_initializer=kernel_init(1.0))(time_embedding)
@@ -81,7 +80,7 @@ def TimeMLP(units, activation_fn=keras.activations.swish):
     return apply
 
 
-def _conv(is3d: bool, filters: int, kernel_size: int = 3, stride: int = 1, padding: str = "same", kernel_initializer=None):
+def _conv(is3d: bool, filters: int, kernel_size: int = 3, stride: int = 1, padding: str = "same", kernel_initializer = None):
     """Returns a Conv3D or Conv2D layer, passing arguments accordingly."""
     def apply(x):
         _kernel_initializer  = kernel_initializer
@@ -105,14 +104,15 @@ def _conv(is3d: bool, filters: int, kernel_size: int = 3, stride: int = 1, paddi
 
 
 def build_model(
-    input_shape: Tuple,
+    input_shape: tuple[int, ...],
     latent_dims: int,
-    downsample_layer: List[bool],
-    layer_filters: List[int],
-    has_attention: List[bool],
+    downsample_layer: list[bool],
+    layer_filters: list[int],
+    has_attention: list[bool],
     num_res_blocks: int = 2,
     norm_groups: int = 8,
-    first_conv_channels: int = 64):
+    first_conv_channels: int = 32,
+    time_embedding_dims: int = 32):
 
     data_input = layers.Input(shape=(*input_shape, latent_dims), name='input')
     time_input = layers.Input(shape=(), dtype=tf.int64, name='time_input')
@@ -128,8 +128,8 @@ def build_model(
         kernel_initializer=kernel_init(1.0),
     )(data_input)
 
-    time_embedding = TimeEmbedding(dim=latent_dims * 4)(time_input)
-    time_mlp = TimeMLP(units=first_conv_channels * 4, activation_fn='silu')(time_embedding)
+    time_embedding = TimeEmbedding(dim=time_embedding_dims)(time_input)
+    time_mlp = _TimeMLP(units=time_embedding_dims * 4, activation_fn='silu')(time_embedding)
 
     skips = [x]
 
@@ -138,7 +138,7 @@ def build_model(
         print(f'Constructing down layer {i}')
         for r in range(num_res_blocks):
             print(f'Constructing resblock {r}')
-            x = ResidualBlock(is3d, filters, groups=norm_groups)([x, time_mlp])
+            x = _ResidualBlock(is3d, filters, groups=norm_groups)([x, time_mlp])
             if has_attention[i]:
                 print(f'Constructing attention for resblock {r}')
                 x = AttentionBlock(is3d, units=filters, groups=norm_groups)(x)
@@ -147,19 +147,18 @@ def build_model(
         print(f'appending {x.shape}')
 
         if downsample_layer[i]:
-            x = DownSample(is3d, layer_filters[i])(x)
+            x = _DownSample(is3d, layer_filters[i])(x)
             print(f'downsampling to {x.shape}')
 
     # middle block
     print('Constructing middle layer')
-    x = ResidualBlock(is3d, filters=layer_filters[-1], groups=norm_groups)([x, time_mlp])
+    x = _ResidualBlock(is3d, filters=layer_filters[-1], groups=norm_groups)([x, time_mlp])
     x = AttentionBlock(is3d, units=layer_filters[-1], groups=norm_groups)(x)
-    x = ResidualBlock(is3d, filters=layer_filters[-1], groups=norm_groups)([x, time_mlp])
+    x = _ResidualBlock(is3d, filters=layer_filters[-1], groups=norm_groups)([x, time_mlp])
 
     # up blocks
-
     if downsample_layer[-1]:
-        x = UpSample(is3d, layer_filters[-1])(x)
+        x = _UpSample(is3d, layer_filters[-1])(x)
         print('Upsampling before up-block')
 
     for i, filters in reversed(list(enumerate(layer_filters))):
@@ -168,19 +167,19 @@ def build_model(
         x = layers.Concatenate(axis=-1)([x, y])
         for r in range(num_res_blocks):
             print(f'Constructing resblock {r}')
-            x = ResidualBlock(is3d, filters=layer_filters[i], groups=norm_groups)([x, time_mlp])
+            x = _ResidualBlock(is3d, filters=layer_filters[i], groups=norm_groups)([x, time_mlp])
             if has_attention[i]:
                 print(f'Constructing attention for resblock {r}')
                 x = AttentionBlock(is3d, units=layer_filters[i], groups=norm_groups)(x)
 
         if i > 0 and downsample_layer[i-1]:
-            x = UpSample(is3d, layer_filters[i])(x)
+            x = _UpSample(is3d, layer_filters[i])(x)
             print(f'up-block upsampling to {x.shape}')
 
     # End layer
     print('Constructing end layer')
     x = layers.GroupNormalization(groups=norm_groups)(x)
     x = keras.activations.swish(x)
-    x = ResidualBlock(is3d, filters=layer_filters[0], groups=norm_groups)([x, time_mlp])
+    x = _ResidualBlock(is3d, filters=layer_filters[0], groups=norm_groups)([x, time_mlp])
     x = _conv(is3d=is3d, filters=latent_dims, kernel_size=3, padding="same", kernel_initializer=kernel_init(0.0))(x)
     return keras.Model([data_input, time_input], x, name="unet")

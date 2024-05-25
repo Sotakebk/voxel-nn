@@ -3,7 +3,7 @@
 import json
 import numpy as np
 
-def load_dataset(file_paths: list) -> tuple[list, list, list, np.ndarray, np.ndarray]:
+def load_dataset(file_paths: list) -> tuple[list[str], list[str], list[str], np.ndarray, np.ndarray]:
     """Load entries from a list of files, then preprocess the entries into a unified dataset."""
     loaded_list = []
     for file_path in file_paths:
