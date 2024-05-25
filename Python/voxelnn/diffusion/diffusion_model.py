@@ -53,7 +53,7 @@ class DiffusionModel(keras.Model):
         signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, noisy_data)
         noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noisy_data)
         pred_noises = network([noisy_data, noise_rates**2], training=training)
-        pred_data = (noisy_data - noise_rates_reshaped * pred_noises) / signal_rates_reshaped
+        pred_data = (noisy_data - (noise_rates_reshaped * pred_noises)) / signal_rates_reshaped
 
         return pred_noises, pred_data
 
@@ -82,8 +82,8 @@ class DiffusionModel(keras.Model):
         start_angle = tf.acos(max_signal_rate)
         end_angle = tf.acos(min_signal_rate)
         diffusion_angles = start_angle + diffusion_times * (end_angle - start_angle)
-        signal_rates = tf.cos(diffusion_angles)
-        noise_rates = tf.sin(diffusion_angles)
+        signal_rates = tf.cos(diffusion_angles)**2
+        noise_rates = tf.sin(diffusion_angles)**2
         return noise_rates, signal_rates
 
 #endregion
@@ -133,9 +133,9 @@ class DiffusionModel(keras.Model):
             tf.print('step ', (step+1), " out of ", diffusion_steps)
             noisy_data = next_noisy_data
 
-            # separate the current noisy data to its components
             diffusion_times = tf.ones((batch_size,)) - step * float(step_size) # 1D
             noise_rates, signal_rates = self._diffusion_schedule(diffusion_times) #1D
+            # separate the current noisy data to its components
             pred_noises, pred_data  = self._denoise(
                 noisy_data, noise_rates, signal_rates, training=False
             )
@@ -170,7 +170,7 @@ class DiffusionModel(keras.Model):
             diffusion_times = tf.ones([1]) - float(step) * step_size # 1D
             noise_rates, signal_rates = self._diffusion_schedule(diffusion_times) #1D
             # separate the current noisy data to its components
-            pred_noises, pred_data  = self._denoise(
+            pred_noises, pred_data = self._denoise(
                 noisy_data, noise_rates, signal_rates, training=False
             )
 
