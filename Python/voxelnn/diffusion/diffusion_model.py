@@ -242,7 +242,7 @@ class DiffusionModel(keras.Model):
             network = self.ema_network
 
         pred_noises = network([noisy_data, noise_rates**2], training=training)
-        pred_data = ((noisy_data - noise_rates_reshaped) * pred_noises) / signal_rates_reshaped
+        pred_data = (noisy_data - (noise_rates_reshaped * pred_noises)) / signal_rates_reshaped
 
         return pred_noises, pred_data, noises
 # endregion
