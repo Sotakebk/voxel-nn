@@ -245,7 +245,6 @@ class DiffusionModel(keras.Model):
         noise_rates = noise_powers**0.5
         signal_rates = signal_powers**0.5
         # mix the images with noises accordingly
-        noisy_data = signal_rates * data + noise_rates * noises
         signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, data)
         noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noises)
         noisy_data = signal_rates_reshaped * data + noise_rates_reshaped * noises

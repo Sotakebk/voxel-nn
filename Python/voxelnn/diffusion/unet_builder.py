@@ -16,7 +16,7 @@ def build_model(
     first_conv_channels: int = 32,
     time_embedding_dims: int = 32,
     min_time_emb_frequency: float = 1.0,
-    max_time_emb_frequency: float = 10000.0):
+    max_time_emb_frequency: float = 1000.0):
     
     is3d = len(input_shape) == 3
 
