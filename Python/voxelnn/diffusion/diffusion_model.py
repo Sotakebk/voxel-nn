@@ -203,10 +203,10 @@ class DiffusionModel(keras.Model):
     @tf.function
     def train_step(self, data):
         with tf.GradientTape() as tape:
-            pred_noises, pred_data, noises = self(data, training=True)
+            pred_noises, pred_data, noises, normalized_data = self(data, training=True)
 
             noise_loss = self.loss(noises, pred_noises)
-            recovery_loss = self.loss(data, pred_data)
+            recovery_loss = self.loss(normalized_data, pred_data)
 
         gradients = tape.gradient(noise_loss, self.network.trainable_weights)
         self.optimizer.apply_gradients(zip(gradients, self.network.trainable_weights))
@@ -221,10 +221,10 @@ class DiffusionModel(keras.Model):
 
     @tf.function
     def test_step(self, data):
-        pred_noises, pred_data, noises = self(data, training=False)
+        pred_noises, pred_data, noises, normalized_data = self(data, training=False)
 
         noise_loss = self.loss(noises, pred_noises)
-        recovery_loss = self.loss(data, pred_data)
+        recovery_loss = self.loss(normalized_data, pred_data)
 
         self.recovery_loss_tracker.update_state(recovery_loss)
         self.noise_loss_tracker.update_state(noise_loss)
@@ -235,8 +235,8 @@ class DiffusionModel(keras.Model):
     def call(self, inputs, training=False) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         """Samples random timestamps, then attempts to predict noise at those timestamps for noisy data.\
             Returns tf.Tensor of predicted noise, predicted data, and the noise that was added."""
-        data = self.normalizer(inputs, training=False)
-        input_shape = tf.shape(data)
+        normalized_data = self.normalizer(inputs, training=False)
+        input_shape = tf.shape(normalized_data)
         noises = tf.random.normal(shape=input_shape)
         noise_powers = tf.random.uniform(
             shape=(input_shape[0],), minval=0.0, maxval=1.0
@@ -245,12 +245,12 @@ class DiffusionModel(keras.Model):
         noise_rates = noise_powers**0.5
         signal_rates = signal_powers**0.5
         # mix the images with noises accordingly
-        signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, data)
+        signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, normalized_data)
         noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noises)
-        noisy_data = signal_rates_reshaped * data + noise_rates_reshaped * noises
+        noisy_data = signal_rates_reshaped * normalized_data + noise_rates_reshaped * noises
 
         pred_noises, pred_data = self._denoise(noisy_data=noisy_data, noise_rates=noise_rates, signal_rates=signal_rates, training=training)
 
-        return pred_noises, pred_data, noises
+        return pred_noises, pred_data, noises, normalized_data
 
 # endregion
