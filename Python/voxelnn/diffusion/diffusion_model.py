@@ -250,7 +250,7 @@ class DiffusionModel(keras.Model):
         noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noises)
         noisy_data = signal_rates_reshaped * data + noise_rates_reshaped * noises
 
-        pred_noises, pred_data = self._denoise(noisy_data=noisy_data, noise_rates=noise_rates, signal_rates=signal_rates, training=training):
+        pred_noises, pred_data = self._denoise(noisy_data=noisy_data, noise_rates=noise_rates, signal_rates=signal_rates, training=training)
 
         return pred_noises, pred_data, noises
 
