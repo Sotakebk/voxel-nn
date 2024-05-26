@@ -9,11 +9,12 @@ import tensorflow as tf
 @keras.saving.register_keras_serializable()
 class DiffusionModel(keras.Model):
     def __init__(self, network: keras.Model, min_signal_rate: float = 0.02, max_signal_rate: float = 0.95, ema: float = 0.999,
-                 normalizer: keras.layers.Normalization = None, name: str = "diffusion_model", **kwargs):
+                 normalizer: keras.layers.Normalization = None, ema_network: keras.Model = None,
+                 name: str = "diffusion_model", **kwargs):
         super().__init__(name=name, **kwargs)
         self.normalizer = normalizer or layers.Normalization(axis=-1)
         self.network = network
-        self.ema_network = keras.models.clone_model(network)
+        self.ema_network = ema_network or keras.models.clone_model(network)
         self.noise_loss_tracker = keras.metrics.Mean(name="noise_loss")
         self.recovery_loss_tracker = keras.metrics.Mean(name="rcvr_loss")
         self.min_signal_rate = min_signal_rate
@@ -27,12 +28,14 @@ class DiffusionModel(keras.Model):
         config['max_signal_rate'] = self.max_signal_rate
         config['ema'] = self.ema
         config['network'] = keras.saving.serialize_keras_object(self.network)
+        config['ema_network'] = keras.saving.serialize_keras_object(self.ema_network)
         config['normalizer'] = keras.saving.serialize_keras_object(self.normalizer)
         return config
 
     @classmethod
     def from_config(cls, config):
         config['network'] = keras.layers.deserialize(config['network'])
+        config['ema_network'] = keras.layers.deserialize(config['ema_network'])
         config['normalizer'] = keras.layers.deserialize(config['normalizer'])
 
         return cls(**config)
@@ -60,7 +63,7 @@ class DiffusionModel(keras.Model):
 #region utilities
 
     def _denormalize(self, data):
-        return self.normalizer.mean + data * self.normalizer.variance**0.5
+        return self.normalizer.mean + data * (self.normalizer.variance**0.5)
 
     @tf.function
     def _reshape_rates_for_data(self, rates, data):
@@ -82,8 +85,8 @@ class DiffusionModel(keras.Model):
         start_angle = tf.acos(max_signal_rate)
         end_angle = tf.acos(min_signal_rate)
         diffusion_angles = start_angle + diffusion_times * (end_angle - start_angle)
-        signal_rates = tf.cos(diffusion_angles)**2
-        noise_rates = tf.sin(diffusion_angles)**2
+        noise_rates = tf.sin(diffusion_angles)
+        signal_rates = tf.cos(diffusion_angles)
         return noise_rates, signal_rates
 
 #endregion
@@ -133,10 +136,10 @@ class DiffusionModel(keras.Model):
             tf.print('step ', (step+1), " out of ", diffusion_steps)
             noisy_data = next_noisy_data
 
-            diffusion_times = tf.ones((batch_size,)) - step * float(step_size) # 1D
+            diffusion_times = tf.ones((batch_size,)) - float(step) * step_size # 1D
             noise_rates, signal_rates = self._diffusion_schedule(diffusion_times) #1D
             # separate the current noisy data to its components
-            pred_noises, pred_data  = self._denoise(
+            pred_noises, pred_data = self._denoise(
                 noisy_data, noise_rates, signal_rates, training=False
             )
 
@@ -192,6 +195,11 @@ class DiffusionModel(keras.Model):
 
 #region training
 
+    def learn_data_distribution(self, data):
+        self.normalizer.adapt(data)
+        print(f'DiffusionModel: Learned data mean: {self.normalizer.mean}')
+        print(f'DiffusionModel: Learned data variance: {self.normalizer.variance}')
+
     @tf.function
     def train_step(self, data):
         with tf.GradientTape() as tape:
@@ -227,22 +235,23 @@ class DiffusionModel(keras.Model):
     def call(self, inputs, training=False) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         """Samples random timestamps, then attempts to predict noise at those timestamps for noisy data.\
             Returns tf.Tensor of predicted noise, predicted data, and the noise that was added."""
-        data = self.normalizer(inputs, training=training)
+        data = self.normalizer(inputs, training=False)
         input_shape = tf.shape(data)
         noises = tf.random.normal(shape=input_shape)
-        diffusion_times = tf.random.uniform(shape=input_shape[:1])
-        noise_rates, signal_rates = self._diffusion_schedule(diffusion_times)
+        noise_powers = tf.random.uniform(
+            shape=(input_shape[0],), minval=0.0, maxval=1.0
+        )
+        signal_powers = 1.0 - noise_powers
+        noise_rates = noise_powers**0.5
+        signal_rates = signal_powers**0.5
+        # mix the images with noises accordingly
+        noisy_data = signal_rates * data + noise_rates * noises
         signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, data)
         noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noises)
         noisy_data = signal_rates_reshaped * data + noise_rates_reshaped * noises
 
-        if training:
-            network = self.network
-        else:
-            network = self.ema_network
-
-        pred_noises = network([noisy_data, noise_rates**2], training=training)
-        pred_data = (noisy_data - (noise_rates_reshaped * pred_noises)) / signal_rates_reshaped
+        pred_noises, pred_data = self._denoise(noisy_data=noisy_data, noise_rates=noise_rates, signal_rates=signal_rates, training=training):
 
         return pred_noises, pred_data, noises
+
 # endregion
