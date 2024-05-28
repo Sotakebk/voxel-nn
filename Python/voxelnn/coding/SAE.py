@@ -3,6 +3,7 @@
 import keras
 import tensorflow as tf
 import numpy as np
+from . import ae_losses
 
 class SAETrainer(keras.Model):
     """Do an explaination here."""
@@ -33,36 +34,13 @@ class SAETrainer(keras.Model):
 
     def __eval_sae__(self, data):
         z_mean, z_log_var, z = self.encoder(data)
-        reconstruction = self.decoder(z)
+        r = self.decoder(z)
 
-        reconstruction_loss = tf.reduce_mean(
-            tf.reduce_mean(
-                keras.losses.sparse_categorical_crossentropy(data, reconstruction, axis=-1,),
-                axis=tf.range(1, tf.rank(data)-1),
-            ))
+        reconstruction_loss = ae_losses.mean_sparse_categorical_crossentropy(data, r)
 
-        kld_loss = tf.reduce_mean(
-            tf.reduce_mean(
-                -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)),
-                axis=tf.range(1, tf.rank(data)-1),
-            )) * self.kld_loss_weight
+        kld_loss = ae_losses.mean_kld(z_mean, z_log_var) * self.kld_loss_weight
 
-        averages = None
-
-        if self.filter.ndim == 4: # 2d conv
-            averages = tf.nn.conv2d(input=z, filters=tf.constant(self.filter, dtype=z.dtype),
-                           strides=[1]*self.filter.ndim, padding='SAME')
-        elif self.filter.ndim == 5: # 3d conv
-            averages = tf.nn.conv3d(input=z, filters=tf.constant(self.filter, dtype=z.dtype),
-                           strides=[1]*self.filter.ndim, padding='SAME')
-        else:
-            raise Exception("Only 2D and 3D conv is supported")
-
-        str_loss = tf.reduce_mean(
-            tf.reduce_mean(
-                tf.math.reduce_euclidean_norm(z - averages, axis=-1,),
-                axis=tf.range(1, tf.rank(data)-1),
-            )) * self.str_loss_weight
+        str_loss = ae_losses.mean_structurization_loss(z, self.filter) * self.str_loss_weight
 
         total_loss = reconstruction_loss + kld_loss + str_loss 
         return (total_loss, reconstruction_loss, kld_loss, str_loss)

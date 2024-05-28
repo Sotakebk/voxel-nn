@@ -130,14 +130,15 @@ class DiffusionModel(keras.Model):
         step_size = 1.0 / float(diffusion_steps)
 
         next_noisy_data = initial_noise
-        pred_noises = tf.zeros(shape=initial_noise.shape)
-        pred_data = tf.zeros(shape=initial_noise.shape)
         for step in tf.range(diffusion_steps):
             tf.print('step ', (step+1), " out of ", diffusion_steps)
             noisy_data = next_noisy_data
+            mean, variance = tf.nn.moments(x, [0, 1, 2, 3])
+            tf.print('noisy data mean: ', mean, 'noisy data variance: ', variance)
 
             diffusion_times = tf.ones((batch_size,)) - float(step) * step_size # 1D
             noise_rates, signal_rates = self._diffusion_schedule(diffusion_times) #1D
+            tf.print('noise_rates: ', noise_rates[0], ' signal_rates: ', signal_rates[0])
             # separate the current noisy data to its components
             pred_noises, pred_data = self._denoise(
                 noisy_data, noise_rates, signal_rates, training=False
@@ -147,8 +148,11 @@ class DiffusionModel(keras.Model):
             next_noise_rates, next_signal_rates = self._diffusion_schedule(
                 next_diffusion_times
             )
+            tf.print('next_noise_rates: ', next_noise_rates[0], ' next_signal_rates: ', next_signal_rates[0])
+            reshaped_next_signal_rates = self._reshape_rates_for_data(next_signal_rates, pred_data)
+            reshaped_next_noise_rates = self._reshape_rates_for_data(next_noise_rates, pred_noises)
             next_noisy_data = (
-                next_signal_rates * pred_data + next_noise_rates * pred_noises
+                reshaped_next_signal_rates * pred_data - reshaped_next_noise_rates * pred_noises
             )
 
         return pred_data
@@ -181,8 +185,10 @@ class DiffusionModel(keras.Model):
             next_noise_rates, next_signal_rates = self._diffusion_schedule(
                 next_diffusion_times
             )
+            reshaped_next_signal_rates = self._reshape_rates_for_data(next_signal_rates, pred_data)
+            reshaped_next_noise_rates = self._reshape_rates_for_data(next_noise_rates, pred_noises)
             next_noisy_data = (
-                next_signal_rates * pred_data + next_noise_rates * pred_noises
+                reshaped_next_signal_rates * pred_data - reshaped_next_noise_rates * pred_noises
             )
 
             # update history here

@@ -2,6 +2,7 @@
 
 import keras
 import tensorflow as tf
+from . import ae_losses
 
 class VAETrainer(keras.Model):
     """Do an explaination here."""
@@ -29,20 +30,12 @@ class VAETrainer(keras.Model):
         z_mean, z_log_var, z = self.encoder(data)
         r = self.decoder(z)
 
-        rcstr_loss = tf.reduce_mean(
-            tf.reduce_mean(
-                keras.losses.sparse_categorical_crossentropy(data, r, axis=-1,),
-                axis=tf.range(1, tf.rank(data)-1),
-            ))
+        reconstruction_loss = ae_losses.mean_sparse_categorical_crossentropy(data, r) * self.kld_loss_weight
 
-        kld_loss = tf.reduce_mean(
-            tf.reduce_mean(
-                -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)),
-                axis=tf.range(1, tf.rank(data)-1),
-            )) * self.kld_loss_weight
+        kld_loss = ae_losses.mean_kld(z_mean, z_log_var) * self.kld_loss_weight
 
-        total_loss = rcstr_loss + kld_loss
-        return (total_loss, rcstr_loss, kld_loss)
+        total_loss = reconstruction_loss + kld_loss
+        return (total_loss, reconstruction_loss, kld_loss)
 
     def train_step(self, data):
         with tf.GradientTape() as tape:
