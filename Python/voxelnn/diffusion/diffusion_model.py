@@ -5,6 +5,7 @@ from typing import Tuple
 import keras
 from keras import layers
 import tensorflow as tf
+import numpy as np
 
 @keras.saving.register_keras_serializable()
 class DiffusionModel(keras.Model):
@@ -16,7 +17,6 @@ class DiffusionModel(keras.Model):
         self.network = network
         self.ema_network = ema_network or keras.models.clone_model(network)
         self.noise_loss_tracker = keras.metrics.Mean(name="noise_loss")
-        self.recovery_loss_tracker = keras.metrics.Mean(name="rcvr_loss")
         self.min_signal_rate = min_signal_rate
         self.max_signal_rate = max_signal_rate
         self.ema = ema
@@ -42,23 +42,19 @@ class DiffusionModel(keras.Model):
 
     @property
     def metrics(self):
-        return [self.noise_loss_tracker, self.recovery_loss_tracker]
+        return [self.noise_loss_tracker]
 
     @tf.function
-    def _denoise(self, noisy_data: tf.Tensor, noise_rates: tf.Tensor, signal_rates: tf.Tensor, training: bool):
-        """Takes noisy data, noise and signal rates, and attempts to predict the noise, \
-            then subtracts the noise from the data."""
+    def _predict_noise(self, noisy_data: tf.Tensor, noise_powers: tf.Tensor, training: bool) -> tf.Tensor:
+        """Takes noisy data and noise power, and attempts to predict the noise."""
         if training:
             network = self.network
         else:
             network = self.ema_network
 
-        signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, noisy_data)
-        noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noisy_data)
-        pred_noises = network([noisy_data, noise_rates**2], training=training)
-        pred_data = (noisy_data - (noise_rates_reshaped * pred_noises)) / signal_rates_reshaped
+        pred_noises = network([noisy_data, noise_powers], training=training)
 
-        return pred_noises, pred_data
+        return pred_noises
 
 #region utilities
 
@@ -66,7 +62,7 @@ class DiffusionModel(keras.Model):
         return self.normalizer.mean + data * (self.normalizer.variance**0.5)
 
     @tf.function
-    def _reshape_rates_for_data(self, rates, data):
+    def _reshape_1d_for_data(self, rates, data):
         """Reshape a 1D rates tensor to multiply data tensor with."""
         input_shape = tf.shape(data)
         input_rank = tf.rank(data)
@@ -78,92 +74,60 @@ class DiffusionModel(keras.Model):
         return rates_reshaped
 
     @tf.function
-    def _diffusion_schedule(self, diffusion_times):
-        """Calculates two 1D tensors of noise and signal rate for each value for given diffusion timestamps."""
+    def _cosine_diffusion_schedule(self, diffusion_times) -> tf.Tensor:
+        """Calculates a tensor of signal powers from diffusion timestamps."""
         max_signal_rate = tf.constant([float(self.max_signal_rate)])
         min_signal_rate = tf.constant([float(self.min_signal_rate)])
         start_angle = tf.acos(max_signal_rate)
         end_angle = tf.acos(min_signal_rate)
         diffusion_angles = start_angle + diffusion_times * (end_angle - start_angle)
-        noise_rates = tf.sin(diffusion_angles)
         signal_rates = tf.cos(diffusion_angles)
-        return noise_rates, signal_rates
+        signal_powers = signal_rates ** 2
+        return signal_powers
 
 #endregion
 
-    def generate_one_sample_with_history(self, diffusion_steps: int, seed: int = None):
+    def generate(self, diffusion_steps: int = 10, element_count: int = 1, seed: int = None, method: str = 'DDIM'
+                 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         seed = seed or random.randint(-100000000, 100000000)
-        pred_data, pred_data_history, pred_noises_history, noisy_data_history = self._generate_one_sample_with_history(diffusion_steps, seed)
+
+        pred_data, pred_data_history, pred_noises_history, noisy_data_history = \
+            self._generate_with_history(diffusion_steps=diffusion_steps, element_count=element_count, seed=seed, method=method)
+
         pred_data = self._denormalize(pred_data)
         pred_data_history = self._denormalize(pred_data_history)
         pred_noises_history = self._denormalize(pred_noises_history)
         noisy_data_history = self._denormalize(noisy_data_history)
         return pred_data.numpy(), pred_data_history.numpy(), pred_noises_history.numpy(), noisy_data_history.numpy()
 
-    def generate_many_samples(self, element_count, diffusion_steps, seed: int = None):
-        seed = seed or random.randint(-100000000, 100000000)
-        data = self._generate_many_samples(element_count, diffusion_steps, seed)
-        data = self._denormalize(data) # maybe put this in _generate_many
-        return data.numpy()
+    @tf.function
+    def _generate_with_history(self, diffusion_steps: int, element_count: int, seed: int, method: str):
+        input_shape = tf.constant(list(self.unet_data_input_shape)[1:])
+        target_shape = tf.concat([[int(element_count)], input_shape], axis=-1)
+        initial_noise = tf.random.normal(shape=target_shape, seed=seed)
 
-    @tf.function
-    def _generate_many_samples(self, num_samples, diffusion_steps, seed):
-        batch_size = tf.constant([int(num_samples)], tf.dtypes.int32)
-        input_shape = tf.constant(list(self.unet_data_input_shape)[1:])
-        target_shape = tf.concat([batch_size, input_shape], axis=-1)
-        initial_noise = tf.random.normal(shape=target_shape, seed=seed)
-        generated_samples = self._reverse_diffusion_for_many(initial_noise, diffusion_steps)
-        return generated_samples
-    
-    @tf.function
-    def _generate_one_sample_with_history(self, diffusion_steps, seed):
-        input_shape = tf.constant(list(self.unet_data_input_shape)[1:])
-        target_shape = tf.concat([[1], input_shape], axis=-1)
-        initial_noise = tf.random.normal(shape=target_shape, seed=seed)
         pred_data, pred_data_history, pred_noises_history, noisy_data_history = \
-            self._reverse_diffusion_for_one_sample_with_history(initial_noise, diffusion_steps)
+            self._reverse_diffusion_with_history(initial_noise, diffusion_steps, method)
+
         return pred_data, pred_data_history, pred_noises_history, noisy_data_history
 
     @tf.function
-    def _reverse_diffusion_for_many(self, initial_noise, diffusion_steps):
-        batch_size = initial_noise.shape[0]
-        step_size = 1.0 / float(diffusion_steps)
+    def _self_norm(self, data):
+        reduceDims = tf.range(1, tf.rank(data)-1)
+        mean = tf.reduce_mean(data, axis=reduceDims, keepdims=True)
+        var = tf.math.reduce_variance(data, axis=reduceDims, keepdims=True)
+        result = (data - mean) / (var ** 0.5)
+        return result
 
-        next_noisy_data = initial_noise
-        for step in tf.range(diffusion_steps):
-            tf.print('step ', (step+1), " out of ", diffusion_steps)
-            noisy_data = next_noisy_data
-            mean, variance = tf.nn.moments(x, [0, 1, 2, 3])
-            tf.print('noisy data mean: ', mean, 'noisy data variance: ', variance)
-
-            diffusion_times = tf.ones((batch_size,)) - float(step) * step_size # 1D
-            noise_rates, signal_rates = self._diffusion_schedule(diffusion_times) #1D
-            tf.print('noise_rates: ', noise_rates[0], ' signal_rates: ', signal_rates[0])
-            # separate the current noisy data to its components
-            pred_noises, pred_data = self._denoise(
-                noisy_data, noise_rates, signal_rates, training=False
-            )
-
-            next_diffusion_times = diffusion_times - float(step_size)
-            next_noise_rates, next_signal_rates = self._diffusion_schedule(
-                next_diffusion_times
-            )
-            tf.print('next_noise_rates: ', next_noise_rates[0], ' next_signal_rates: ', next_signal_rates[0])
-            reshaped_next_signal_rates = self._reshape_rates_for_data(next_signal_rates, pred_data)
-            reshaped_next_noise_rates = self._reshape_rates_for_data(next_noise_rates, pred_noises)
-            next_noisy_data = (
-                reshaped_next_signal_rates * pred_data - reshaped_next_noise_rates * pred_noises
-            )
-
-        return pred_data
-    
     @tf.function
-    def _reverse_diffusion_for_one_sample_with_history(self, initial_noise, diffusion_steps):
+    def _reverse_diffusion_with_history(self, initial_noise: tf.Tensor, diffusion_steps: int, method: str):
+        tf.print('method:', method)
         step_size = 1.0 / float(diffusion_steps)
 
         next_noisy_data = initial_noise
+        tf.print('initial_noise variance:', tf.math.reduce_variance(initial_noise))
 
-        history_shape = tf.concat([[int(diffusion_steps)], initial_noise.shape[1:]], axis=-1)
+        history_shape = tf.concat([[int(diffusion_steps)], initial_noise.shape], axis=-1)
         pred_noises_history = tf.zeros(shape=history_shape)
         pred_data_history = tf.zeros(shape=history_shape)
         noisy_data_history = tf.zeros(shape=history_shape)
@@ -174,28 +138,63 @@ class DiffusionModel(keras.Model):
             tf.print('step ', (step+1), " out of ", diffusion_steps)
             noisy_data = next_noisy_data
 
-            diffusion_times = tf.ones([1]) - float(step) * step_size # 1D
-            noise_rates, signal_rates = self._diffusion_schedule(diffusion_times) #1D
-            # separate the current noisy data to its components
-            pred_noises, pred_data = self._denoise(
-                noisy_data, noise_rates, signal_rates, training=False
-            )
+            diffusion_times = tf.ones([1]) - float(step) * step_size
+            tf.print('diffusion_times: ', diffusion_times)
+            signal_powers = self._cosine_diffusion_schedule(diffusion_times)
+            noise_powers = 1 - signal_powers
+            noise_power_sqrt = noise_powers ** 0.5
+            signal_power_sqrt = signal_powers ** 0.5
+            tf.print('noise_powers:', noise_powers, 'signal_powers:', signal_powers)
 
-            next_diffusion_times = diffusion_times - step_size
-            next_noise_rates, next_signal_rates = self._diffusion_schedule(
-                next_diffusion_times
-            )
-            reshaped_next_signal_rates = self._reshape_rates_for_data(next_signal_rates, pred_data)
-            reshaped_next_noise_rates = self._reshape_rates_for_data(next_noise_rates, pred_noises)
-            next_noisy_data = (
-                reshaped_next_signal_rates * pred_data - reshaped_next_noise_rates * pred_noises
-            )
+            pred_noises = self._predict_noise(noisy_data=noisy_data, noise_powers=noise_powers, training=False)
+            tf.print('pred_noises variance:', tf.math.reduce_variance(pred_noises))
+
+            next_diffusion_times = tf.ones([1]) - float(step+1) * step_size
+            next_signal_powers = self._cosine_diffusion_schedule(next_diffusion_times)
+            next_noise_powers = 1 - next_signal_powers
+            next_noise_power_sqrt = next_noise_powers ** 0.5
+            next_signal_power_sqrt = next_signal_powers ** 0.5
+            tf.print('next_noise_powers:', next_noise_powers, 'next_signal_powers:', next_signal_powers)
+
+
+            if method == 'DDIM':
+                pred_data = (noisy_data - (noise_power_sqrt * pred_noises)) / signal_power_sqrt
+                tf.print('pred_data variance:', tf.math.reduce_variance(pred_data))
+                noisy_data = next_signal_power_sqrt * pred_data + next_noise_power_sqrt * pred_noises
+                tf.print('noisy_data variance:', tf.math.reduce_variance(pred_data))
+            elif method == 'DDIM-NORM':
+                pred_data = (noisy_data - (noise_power_sqrt * pred_noises)) / signal_power_sqrt
+                tf.print('pred_data variance:', tf.math.reduce_variance(pred_data))
+                noisy_data = next_signal_power_sqrt * pred_data + next_noise_power_sqrt * pred_noises
+                noisy_data = next_signal_powers * noisy_data + next_noise_powers * self._self_norm(noisy_data)
+                tf.print('noisy_data variance:', tf.math.reduce_variance(pred_data))
+            elif method == 'DDPM':
+                sigma = ((next_noise_powers/noise_powers) ** 0.5) * ((noise_powers/next_signal_powers) ** 0.5)
+                pred_data = (noisy_data - (noise_power_sqrt * pred_noises)) / signal_power_sqrt
+                random_noise = tf.random.normal(shape=initial_noise.shape)
+                noisy_data = next_signal_power_sqrt * pred_data + ((next_noise_powers * sigma ** 2) ** 0.5) * pred_noises + sigma * random_noise
+            elif method == 'EXPERIMENTAL':
+                pred_data = (noisy_data - (noise_power_sqrt * pred_noises)) / signal_power_sqrt
+                tf.print('pred_data variance:', tf.math.reduce_variance(pred_data))
+                noisy_data = next_signal_power_sqrt * pred_data - next_noise_power_sqrt * pred_noises
+                tf.print('noisy_data variance:', tf.math.reduce_variance(pred_data))
+            elif method == 'EXPERIMENTAL2':
+                pred_data = noisy_data - pred_noises * noise_power_sqrt
+                tf.print('pred_data variance:', tf.math.reduce_variance(pred_data))
+                noisy_data = next_signal_power_sqrt * pred_data - next_noise_power_sqrt * pred_noises
+                tf.print('noisy_data variance:', tf.math.reduce_variance(pred_data))
+            else:
+                raise Exception(f"Unknown method '{method}'!")
 
             # update history here
-            indices = tf.reshape(step, shape=(1, 1))
-            pred_noises_history = tf.tensor_scatter_nd_update(pred_noises_history, indices, pred_noises)
-            pred_data_history = tf.tensor_scatter_nd_update(pred_data_history, indices, pred_data)
-            noisy_data_history = tf.tensor_scatter_nd_update(noisy_data_history, indices, next_noisy_data)
+            indices = tf.reshape(step, [1,1])  # The iteration index
+            pred_noises_updates = tf.expand_dims(pred_noises, 0)
+            pred_noises_history = tf.tensor_scatter_nd_update(pred_noises_history, indices, pred_noises_updates)
+            pred_data_updates = tf.expand_dims(pred_data, 0)
+            pred_data_history = tf.tensor_scatter_nd_update(pred_data_history, indices, pred_data_updates)
+            noisy_data_updates = tf.expand_dims(noisy_data, 0)
+            noisy_data_history = tf.tensor_scatter_nd_update(noisy_data_history, indices, noisy_data_updates)
+            next_noisy_data = noisy_data
 
         return pred_data, pred_data_history, pred_noises_history, noisy_data_history
 
@@ -209,16 +208,14 @@ class DiffusionModel(keras.Model):
     @tf.function
     def train_step(self, data):
         with tf.GradientTape() as tape:
-            pred_noises, pred_data, noises, normalized_data = self(data, training=True)
+            pred_noises, noises = self(data, training=True)
 
             noise_loss = self.loss(noises, pred_noises)
-            recovery_loss = self.loss(normalized_data, pred_data)
 
         gradients = tape.gradient(noise_loss, self.network.trainable_weights)
         self.optimizer.apply_gradients(zip(gradients, self.network.trainable_weights))
 
         self.noise_loss_tracker.update_state(noise_loss)
-        self.recovery_loss_tracker.update_state(recovery_loss)
 
         for weight, ema_weight in zip(self.network.weights, self.ema_network.weights):
             ema_weight.assign(self.ema * ema_weight + (1 - self.ema) * weight)
@@ -227,12 +224,10 @@ class DiffusionModel(keras.Model):
 
     @tf.function
     def test_step(self, data):
-        pred_noises, pred_data, noises, normalized_data = self(data, training=False)
+        pred_noises, noises = self(data, training=False)
 
         noise_loss = self.loss(noises, pred_noises)
-        recovery_loss = self.loss(normalized_data, pred_data)
 
-        self.recovery_loss_tracker.update_state(recovery_loss)
         self.noise_loss_tracker.update_state(noise_loss)
 
         return {m.name: m.result() for m in self.metrics}
@@ -251,12 +246,12 @@ class DiffusionModel(keras.Model):
         noise_rates = noise_powers**0.5
         signal_rates = signal_powers**0.5
         # mix the images with noises accordingly
-        signal_rates_reshaped = self._reshape_rates_for_data(signal_rates, normalized_data)
-        noise_rates_reshaped = self._reshape_rates_for_data(noise_rates, noises)
+        signal_rates_reshaped = self._reshape_1d_for_data(signal_rates, normalized_data)
+        noise_rates_reshaped = self._reshape_1d_for_data(noise_rates, noises)
         noisy_data = signal_rates_reshaped * normalized_data + noise_rates_reshaped * noises
 
-        pred_noises, pred_data = self._denoise(noisy_data=noisy_data, noise_rates=noise_rates, signal_rates=signal_rates, training=training)
+        pred_noises = self._predict_noise(noisy_data=noisy_data, noise_powers=noise_powers, training=training)
 
-        return pred_noises, pred_data, noises, normalized_data
+        return pred_noises, noises
 
 # endregion

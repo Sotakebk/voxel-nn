@@ -36,10 +36,15 @@ def load_dataset(file_paths: list) -> tuple[list[str], list[str], list[str], np.
     return (tag_names, block_names, entry_names, tags_multilabel, blocks)
 
 
-def cooccurence_matrix(tags_multilabel: np.ndarray) -> np.ndarray:
+def cooccurence_matrix(tags_multilabel: np.ndarray, tag_names) -> tuple[np.ndarray, list[str]]:
     """Calculate """
+    negative_labels = ['NOT ' + element for element in tag_names]
+    result_names = tag_names + negative_labels
+    negatives = 1 - tags_multilabel
+    tags_multilabel = np.append(tags_multilabel, negatives, axis=1)
     _, tag_count = tags_multilabel.shape
     matrix = np.zeros((tag_count, tag_count))
+    print(tags_multilabel.shape)
     for x in range(0, tag_count):
         for y in range(0, tag_count):
             if y > x:
@@ -48,7 +53,7 @@ def cooccurence_matrix(tags_multilabel: np.ndarray) -> np.ndarray:
             matrix[x, y] = value
             matrix[y, x] = value
 
-    return matrix
+    return matrix, result_names
 
 
 def construct_entry_dto(friendly_name: str,
