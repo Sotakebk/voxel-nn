@@ -30,11 +30,11 @@ class VAETrainer(keras.Model):
         z_mean, z_log_var, z = self.encoder(data)
         r = self.decoder(z)
 
-        reconstruction_loss = ae_losses.mean_sparse_categorical_crossentropy(data, r) * self.kld_loss_weight
+        reconstruction_loss = ae_losses.mean_sparse_categorical_crossentropy(data, r)
 
-        kld_loss = ae_losses.mean_kld(z_mean, z_log_var) * self.kld_loss_weight
+        kld_loss = ae_losses.mean_kld(z_mean, z_log_var)
 
-        total_loss = reconstruction_loss + kld_loss
+        total_loss = reconstruction_loss + kld_loss * self.kld_loss_weight
         return (total_loss, reconstruction_loss, kld_loss)
 
     def train_step(self, data):

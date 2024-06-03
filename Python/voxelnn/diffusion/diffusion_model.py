@@ -183,6 +183,11 @@ class DiffusionModel(keras.Model):
                 tf.print('pred_data variance:', tf.math.reduce_variance(pred_data))
                 noisy_data = next_signal_power_sqrt * pred_data - next_noise_power_sqrt * pred_noises
                 tf.print('noisy_data variance:', tf.math.reduce_variance(pred_data))
+            elif method == 'EXPERIMENTAL3':
+                pred_data = (noisy_data - (noise_power_sqrt * pred_noises)) / signal_power_sqrt
+                tf.print('pred_data variance:', tf.math.reduce_variance(pred_data))
+                noisy_data = next_signal_power_sqrt * pred_data - next_noise_power_sqrt * pred_noises
+                tf.print('noisy_data variance:', tf.math.reduce_variance(pred_data))
             else:
                 raise Exception(f"Unknown method '{method}'!")
 

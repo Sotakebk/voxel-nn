@@ -38,11 +38,11 @@ class SAETrainer(keras.Model):
 
         reconstruction_loss = ae_losses.mean_sparse_categorical_crossentropy(data, r)
 
-        kld_loss = ae_losses.mean_kld(z_mean, z_log_var) * self.kld_loss_weight
+        kld_loss = ae_losses.mean_kld(z_mean, z_log_var)
 
-        str_loss = ae_losses.mean_structurization_loss(z, self.filter) * self.str_loss_weight
+        str_loss = ae_losses.mean_structurization_loss(z, self.filter)
 
-        total_loss = reconstruction_loss + kld_loss + str_loss 
+        total_loss = reconstruction_loss + kld_loss * self.kld_loss_weight + str_loss  * self.str_loss_weight
         return (total_loss, reconstruction_loss, kld_loss, str_loss)
 
     def train_step(self, data):
