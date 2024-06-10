@@ -10,7 +10,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-colormap_name = 'tab10'
+
+OVERRIDDEN_COLORS = None
+
+def get_colors():
+    colormap_name = 'tab10'
+    global OVERRIDDEN_COLORS
+    return OVERRIDDEN_COLORS or mpl.colormaps[colormap_name].colors
+
+def set_color_scheme(block_names: list[str], color_dict: dict[str, tuple[float, float, float]]):
+    global OVERRIDDEN_COLORS
+    OVERRIDDEN_COLORS = [color_dict[name] for name in block_names]
 
 def result_json_widget(text: str, title = 'JSON to copy:') -> widgets.Widget:
     """Use to display a text field to conveniently copy from."""
@@ -73,7 +83,7 @@ def render_data_history_and_other_stuff(pred_data_history, decoder, index = 0, u
     f, axarr = plt.subplots(iterations, 2, sharex=True, sharey=True, figsize=(unit_per_image*2, unit_per_image*iterations))
     decoded_history = decoder.predict(pred_data_history[:,index,...])
     decoded_history = np.argmax(decoded_history, axis=-1).astype(int)
-    colors_local = np.array(mpl.colormaps[colormap_name].colors)
+    colors_local = np.array(get_colors())
     colored_history = colors_local[decoded_history]
     plt.tight_layout()
 
@@ -109,10 +119,10 @@ def peek_encoding_and_decoding(blocks, encoder, decoder, samples=10):
     z_decoded = decoder.predict(z)
     z_mean_decoded = np.argmax(z_mean_decoded, axis=-1).astype(int)
     z_decoded = np.argmax(z_decoded, axis=-1).astype(int)
-    colors_local = np.array(mpl.colormaps[colormap_name].colors)
+    colors_local = np.array(get_colors())
     colored_z_mean_decoded = colors_local[z_mean_decoded]
     colored_z_decoded = colors_local[z_decoded]
-    colored_blocks = colors_local[blocks]
+    colored_blocks = colors_local[blocks[:samples,...]]
 
     size_per_unit = 3
     f, axarr = plt.subplots(rows, columns, sharex=True, sharey=True, figsize=(columns * size_per_unit, rows * size_per_unit))
@@ -163,7 +173,7 @@ def render_all_predictions(pred_data, decoder):
     f, axarr = plt.subplots(entries//2, 4, sharex=True, sharey=True, figsize=(unit_per_image*4, unit_per_image*(entries//2)))
     decoded_data = decoder.predict(pred_data)
     decoded_data = np.argmax(decoded_data, axis=-1).astype(int)
-    colors_local = np.array(mpl.colormaps[colormap_name].colors)
+    colors_local = np.array(get_colors())
     colored_data = colors_local[decoded_data]
     plt.tight_layout()
 
@@ -198,7 +208,7 @@ def render_some_data(blocks):
     entries = blocks.shape[0]
     unit_per_image = 4
     f, axarr = plt.subplots(entries//4, 4, sharex=True, sharey=True, figsize=(unit_per_image*4, unit_per_image*(entries//4)))
-    colors_local = np.array(mpl.colormaps[colormap_name].colors)
+    colors_local = np.array(get_colors())
     colored_data = colors_local[blocks]
     plt.tight_layout()
 
@@ -215,7 +225,7 @@ def render_some_data(blocks):
         render_result(colored_data[i, ...], r, c)
 
 def peek_latent_space(encoder, decoder, blocks, block_type_count):
-    z_mean, z_var, z = encoder.predict(blocks)
+    _, _, z = encoder.predict(blocks)
     distinct_block = np.arange(block_type_count).reshape(block_type_count, 1, 1)
     poles, _, _ = encoder.predict(distinct_block)
     poles_x = poles[...,0].reshape(block_type_count)
@@ -234,7 +244,7 @@ def peek_latent_space(encoder, decoder, blocks, block_type_count):
     real = np.argmax(decoded, axis=-1)
     real = real.reshape(steps, steps)
     real = np.swapaxes(real, 0, 1)
-    colors_local = np.array(mpl.colormaps[colormap_name].colors)
+    colors_local = np.array(get_colors())
     colored_real = colors_local[real]
     plt.figure()
     poles_x = (poles_x-min_x)/(max_x-min_x)
@@ -242,7 +252,7 @@ def peek_latent_space(encoder, decoder, blocks, block_type_count):
     #poles_x -= 0.5
     #poles_y -= 0.5
     ax = plt.imshow(colored_real, extent=[0, 1, 0, 1])
-    plt.scatter(x=poles_x, y=poles_y, c=mpl.colormaps[colormap_name].colors[:block_type_count], edgecolors=(1.0,1.0,1.0))
+    plt.scatter(x=poles_x, y=poles_y, c=get_colors(), edgecolors=(1.0,1.0,1.0))
     plt.axis('off')
     #plt.xlim(min_x, max_x)
     #plt.ylim(min_y, max_y)

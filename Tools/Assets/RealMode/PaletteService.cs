@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace RealMode.Visualization
@@ -43,6 +44,27 @@ namespace RealMode.Visualization
                 dict.Add(pair.Name, pair.Color);
 
             _currentPalette = new Palette(dict);
+            PrintPalette();
+        }
+
+        private void PrintPalette()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("color_dict = {");
+
+            float FromByte(byte b)
+            {
+                return ((float)b) / 255f;
+            }
+
+            foreach (var pair in DataToConstructPaletteFrom)
+            {
+                var color = pair.Color;
+                sb.AppendLine($"\t\"{pair.Name}\": ({FromByte(color.r)}, {FromByte(color.g)}, {FromByte(color.b)}),");
+            }
+            sb.AppendLine("}");
+
+            Debug.Log(sb.ToString());
         }
 
         private void Update()
